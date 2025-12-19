@@ -1,0 +1,1286 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🤖 봇 관리 패널</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f5f5f5;
+            padding-bottom: 100px;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .header p {
+            font-size: 13px;
+            opacity: 0.9;
+        }
+        
+        .tabs {
+            background: white;
+            display: flex;
+            overflow-x: auto;
+            border-bottom: 2px solid #e0e0e0;
+            position: sticky;
+            top: 0;
+            z-index: 99;
+        }
+        
+        .tab {
+            padding: 15px 20px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            white-space: nowrap;
+            transition: all 0.3s;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .tab:hover {
+            background: #f5f5f5;
+        }
+        
+        .tab.active {
+            border-bottom-color: #667eea;
+            color: #667eea;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .section {
+            background: white;
+            margin: 12px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+        
+        .section-header {
+            padding: 16px 20px;
+            background: #fafafa;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .setting-item {
+            padding: 16px 20px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .setting-item:last-child {
+            border-bottom: none;
+        }
+        
+        .setting-label {
+            font-size: 15px;
+            color: #333;
+            flex: 1;
+        }
+        
+        .setting-desc {
+            font-size: 13px;
+            color: #999;
+            margin-top: 4px;
+        }
+        
+        .setting-input {
+            width: 120px;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 15px;
+            text-align: right;
+        }
+        
+        .setting-input-wide {
+            width: 200px;
+        }
+        
+        .toggle {
+            position: relative;
+            width: 51px;
+            height: 31px;
+            background: #ccc;
+            border-radius: 31px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .toggle.active {
+            background: #667eea;
+        }
+        
+        .toggle-knob {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 27px;
+            height: 27px;
+            background: white;
+            border-radius: 50%;
+            transition: left 0.3s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .toggle.active .toggle-knob {
+            left: 22px;
+        }
+        
+        .list-container {
+            padding: 20px;
+        }
+        
+        .list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+        
+        .list-item span {
+            font-size: 14px;
+            color: #333;
+        }
+        
+        .btn-remove {
+            padding: 6px 12px;
+            background: #ff4757;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+        }
+        
+        .btn-add {
+            width: 100%;
+            padding: 12px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 12px;
+        }
+        
+        .input-group {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        
+        .input-group input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        .save-button {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(100% - 40px);
+            max-width: 860px;
+            padding: 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        
+        .save-button:active {
+            transform: translateX(-50%) scale(0.98);
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.show {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            max-width: 500px;
+            width: calc(100% - 40px);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+        
+        .modal-code {
+            background: #f5f5f5;
+            padding: 16px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin: 16px 0;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .modal-button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        
+        .modal-button.primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .modal-button.secondary {
+            background: #f0f0f0;
+            color: #666;
+        }
+        
+        .password-modal {
+            display: flex;
+        }
+        
+        .password-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 15px;
+            margin: 16px 0;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <!-- 암호 확인 모달 -->
+    <div class="modal password-modal" id="passwordModal">
+        <div class="modal-content">
+            <div class="modal-title">🔐 방장 인증</div>
+            <p style="color: #666; margin: 12px 0;">방장 암호를 입력하세요</p>
+            <input type="password" id="passwordInput" class="password-input" placeholder="암호 입력">
+            <div class="modal-buttons">
+                <button class="modal-button primary" onclick="checkPassword()">확인</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 메인 컨텐츠 -->
+    <div id="mainContent" style="display: none;">
+        <div class="header">
+            <h1>🤖 봇 관리 패널</h1>
+            <p>모든 설정을 한 곳에서 관리하세요</p>
+        </div>
+        
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab(0)">⚙️ 기본설정</div>
+            <div class="tab" onclick="switchTab(1)">💰 포인트</div>
+            <div class="tab" onclick="switchTab(2)">🎮 게임</div>
+            <div class="tab" onclick="switchTab(3)">👥 방장</div>
+            <div class="tab" onclick="switchTab(4)">🚫 차단</div>
+        </div>
+        
+        <div class="container">
+            <!-- 탭 1: 기본 설정 -->
+            <div class="tab-content active" id="tab0">
+                <div class="section">
+                    <div class="section-header">
+                        <div class="section-title">🔧 시스템 설정</div>
+                    </div>
+                    <div class="setting-item">
+                        <div>
+                            <div class="setting-label">출석 시작 시간</div>
+                            <div class="setting-desc">출석 가능 시작 시각 (시)</div>
+                        </div>
+                        <input type="number" id="attendanceStartHour" class="setting-input" min="0" max="23" value="6">
+                    </div>
+                    <div class="setting-item">
+                        <div>
+                            <div class="setting-label">데이터 저장 빈도</div>
+                            <div class="setting-desc">N번 메시지마다 저장</div>
+                        </div>
+                        <input type="number" id="saveFrequency" class="setting-input" min="1" value="20">
+                    </div>
+                    <div class="setting-item">
+                        <div>
+                            <div class="setting-label">입장 환영 메시지</div>
+                            <div class="setting-desc">방 입장 시 환영 메시지</div>
+                        </div>
+                        <div class="toggle active" id="joinMessageToggle" onclick="toggleSwitch('joinMessage')">
+                            <div class="toggle-knob"></div>
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <div>
+                            <div class="setting-label">퇴장 메시지</div>
+                            <div class="setting-desc">방 퇴장 시 메시지</div>
+                        </div>
+                        <div class="toggle" id="leaveMessageToggle" onclick="toggleSwitch('leaveMessage')">
+                            <div class="toggle-knob"></div>
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <div>
+                            <div class="setting-label">닉네임 변경 알림</div>
+                            <div class="setting-desc">닉네임 변경 감지 알림</div>
+                        </div>
+                        <div class="toggle active" id="nicknameAlertToggle" onclick="toggleSwitch('nicknameAlert')">
+                            <div class="toggle-knob"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 탭 2: 포인트 설정 -->
+            <div class="tab-content" id="tab1">
+                <div class="section">
+                    <div class="section-header">
+                        <div class="section-title">💰 기본 보상</div>
+                    </div>
+                    <div class="setting-item">
+                        <div>
+                            <div class="setting-label">채팅 포인트</div>
+                            <div class="setting-desc">메시지당 지급</div>
+                        </div>
+                        <input type="number" id="chatPoint" class="setting-input" min="0" value="1">
+                    </div>
+                    <div class="setting-item">
+                        <div>
+                            <div class="setting-label">채팅 경험치</div>
+                            <div class="setting-desc">메시지당 지급</div>
+                        </div>
+                        <input type="number" id="chatExp" class="setting-input" min="0" value="1">
+                    </div>
+                    <div class="setting-item">
+                        <div>
+                            <div class="setting-label">출석 포인트</div>
+                            <div class="setting-desc">출석 체크 시 지급</div>
+                        </div>
+                        <input type="number" id="attendanceReward" class="setting-input" min="0" value="100">
+                    </div>
+                    <div class="setting-item">
+                        <div>
+                            <div class="setting-label">레벨업 보상</div>
+                            <div class="setting-desc">레벨업 시 지급</div>
+                        </div>
+                        <input type="number" id="levelupReward" class="setting-input" min="0" value="50">
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <div class="section-header">
+                        <div class="section-title">🎁 출석 보너스</div>
+                    </div>
+                    <div class="setting-item">
+                        <div>
+                            <div class="setting-label">7일 연속</div>
+                        </div>
+                        <input type="number" id="day7Bonus" class="setting-input" min="0" value="50">
+                    </div>
+                    <div class="setting-item">
+                        <div>
+                            <div class="setting-label">14일 연속</div>
+                        </div>
+                        <input type="number" id="day14Bonus" class="setting-input" min="0" value="50">
+                    </div>
+                    <div class="setting-item">
+                        <div>
+                            <div class="setting-label">21일 연속</div>
+                        </div>
+                        <input type="number" id="day21Bonus" class="setting-input" min="0" value="50">
+                    </div>
+                    <div class="setting-item">
+                        <div>
+                            <div class="setting-label">28일 연속</div>
+                        </div>
+                        <input type="number" id="day28Bonus" class="setting-input" min="0" value="50">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 탭 3: 게임 설정 -->
+            <div class="tab-content" id="tab2">
+                <div class="section">
+                    <div class="section-header">
+                        <div class="section-title">🎮 게임 보상 (포인트)</div>
+                    </div>
+                    <div class="setting-item">
+                        <div>
+                            <div class="setting-label">야구게임</div>
+                        </div>
+                        <input type="number" id="baseballReward" class="setting-input" min="0" value="50">
+                    </div>
+                    <div class="setting-item">
+                        <div>
+                            <div class="setting-label">끝말잇기</div>
+                        </div>
+                        <input type="number" id="wordReward" class="setting-input" min="0" value="20">
+                    </div>
+                    <div class="setting-item">
+                        <div>
+                            <div class="setting-label">타자게임</div>
+                        </div>
+                        <input type="number" id="typingReward" class="setting-input" min="0" value="30">
+                    </div>
+                    <div class="setting-item">
+                        <div>
+                            <div class="setting-label">초성게임</div>
+                        </div>
+                        <input type="number" id="chosungReward" class="setting-input" min="0" value="15">
+                    </div>
+                    <div class="setting-item">
+                        <div>
+                            <div class="setting-label">밸런스게임</div>
+                        </div>
+                        <input type="number" id="balanceReward" class="setting-input" min="0" value="100">
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <div class="section-header">
+                        <div class="section-title">⭐ 게임 보상 (경험치)</div>
+                    </div>
+                    <div class="setting-item">
+                        <div>
+                            <div class="setting-label">야구게임</div>
+                        </div>
+                        <input type="number" id="baseballExp" class="setting-input" min="0" value="30">
+                    </div>
+                    <div class="setting-item">
+                        <div>
+                            <div class="setting-label">끝말잇기</div>
+                        </div>
+                        <input type="number" id="wordExp" class="setting-input" min="0" value="30">
+                    </div>
+                    <div class="setting-item">
+                        <div>
+                            <div class="setting-label">타자게임</div>
+                        </div>
+                        <input type="number" id="typingExp" class="setting-input" min="0" value="30">
+                    </div>
+                    <div class="setting-item">
+                        <div>
+                            <div class="setting-label">초성게임</div>
+                        </div>
+                        <input type="number" id="chosungExp" class="setting-input" min="0" value="20">
+                    </div>
+                    <div class="setting-item">
+                        <div>
+                            <div class="setting-label">밸런스게임</div>
+                        </div>
+                        <input type="number" id="balanceExp" class="setting-input" min="0" value="10">
+                    </div>
+                    <div class="setting-item">
+                        <div>
+                            <div class="setting-label">로또</div>
+                        </div>
+                        <input type="number" id="lottoExp" class="setting-input" min="0" value="50">
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <div class="section-header">
+                        <div class="section-title">⚙️ 게임 설정</div>
+                    </div>
+                    <div class="setting-item">
+                        <div>
+                            <div class="setting-label">도박 최소 금액</div>
+                        </div>
+                        <input type="number" id="gambleMin" class="setting-input" min="0" value="1000">
+                    </div>
+                    <div class="setting-item">
+                        <div>
+                            <div class="setting-label">도박 최대 변동률 (%)</div>
+                        </div>
+                        <input type="number" id="gambleMaxPercent" class="setting-input" min="0" value="100">
+                    </div>
+                    <div class="setting-item">
+                        <div>
+                            <div class="setting-label">섯다 참가비</div>
+                        </div>
+                        <input type="number" id="sutdaEntryFee" class="setting-input" min="0" value="100">
+                    </div>
+                    <div class="setting-item">
+                        <div>
+                            <div class="setting-label">섯다 보너스</div>
+                        </div>
+                        <input type="number" id="sutdaBonus" class="setting-input" min="0" value="50">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 탭 4: 관리자 관리 -->
+            <div class="tab-content" id="tab3">
+                <div class="section">
+                    <div class="section-header">
+                        <div class="section-title">👑 방장 목록</div>
+                    </div>
+                    <div class="list-container">
+                        <div id="superAdminListView"></div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <div class="section-header">
+                        <div class="section-title">👑 방장 추가/제거</div>
+                    </div>
+                    <div class="list-container">
+                        <div class="input-group">
+                            <input type="text" id="superAdminInput" placeholder="닉네임 입력">
+                            <button class="btn-add" onclick="addSuperAdmin()">추가</button>
+                        </div>
+                        <div id="superAdminList"></div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <div class="section-header">
+                        <div class="section-title">🛡️ 관리자 목록</div>
+                    </div>
+                    <div class="list-container">
+                        <div id="adminListView"></div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <div class="section-header">
+                        <div class="section-title">🛡️ 관리자 추가/제거</div>
+                    </div>
+                    <div class="list-container">
+                        <div class="input-group">
+                            <input type="text" id="adminInput" placeholder="닉네임 입력">
+                            <button class="btn-add" onclick="addAdmin()">추가</button>
+                        </div>
+                        <div id="adminList"></div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <div class="section-header">
+                        <div class="section-title">🔑 기본 방장</div>
+                    </div>
+                    <div class="setting-item">
+                        <div>
+                            <div class="setting-label">기본 방장 닉네임</div>
+                            <div class="setting-desc">하드코딩된 방장</div>
+                        </div>
+                        <input type="text" id="defaultAdmin" class="setting-input setting-input-wide" placeholder="닉네임" onchange="renderSuperAdmins()">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 탭 5: 차단 관리 -->
+            <div class="tab-content" id="tab4">
+                <div class="section">
+                    <div class="section-header">
+                        <div class="section-title">🚫 차단된 유저</div>
+                    </div>
+                    <div class="list-container">
+                        <div class="input-group">
+                            <input type="text" id="blockedUserInput" placeholder="닉네임 입력">
+                            <button class="btn-add" onclick="addBlockedUser()">추가</button>
+                        </div>
+                        <div id="blockedUserList"></div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <div class="section-header">
+                        <div class="section-title">🔒 차단된 방</div>
+                    </div>
+                    <div class="list-container">
+                        <div class="input-group">
+                            <input type="text" id="blockedRoomInput" placeholder="방 이름 입력">
+                            <button class="btn-add" onclick="addBlockedRoom()">추가</button>
+                        </div>
+                        <div id="blockedRoomList"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <button class="save-button" onclick="saveSettings()">💾 저장 및 재시작</button>
+    </div>
+    
+    <!-- 저장 완료 모달 -->
+    <div class="modal" id="saveModal">
+        <div class="modal-content">
+            <div class="modal-title">✅ 명령어가 생성되었습니다!</div>
+            <p style="color: #666; margin: 12px 0; font-size: 14px;">💡 <strong>변경된 설정만 명령어로 생성됩니다</strong></p>
+            
+            <!-- 카톡 명령어 -->
+            <div style="background: #e7f3ff; padding: 16px; border-radius: 8px; margin: 16px 0; border-left: 4px solid #667eea;">
+                <p style="font-size: 15px; color: #333; font-weight: 600; margin-bottom: 8px;">⚡ 사용 방법</p>
+                <p style="font-size: 13px; color: #666; margin-bottom: 12px; line-height: 1.5;">
+                    <strong>1.</strong> 아래 명령어 복사<br>
+                    <strong>2.</strong> 카톡에 붙여넣기<br>
+                    <strong>3.</strong> 전송 → 즉시 적용! ⚡
+                </p>
+                <div class="modal-title" style="font-size: 14px; margin-top: 12px; color: #667eea;">💬 카톡 명령어</div>
+                <div class="modal-code" id="batchCommand" style="background: #f5f5f5; word-break: break-all; font-size: 11px; min-height: 60px;"></div>
+                <button class="modal-button primary" onclick="copyBatchCommand()" style="width: 100%; margin-top: 8px;">📋 명령어 복사</button>
+            </div>
+            
+            <div class="modal-buttons">
+                <button class="modal-button secondary" onclick="closeModal()">닫기</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const ADMIN_PASSWORD = "admin123";
+        
+        let settings = {
+            joinMessage: true,
+            leaveMessage: false,
+            nicknameAlert: true,
+            superAdmins: ["방장", "영기 98 용인 남", "꿍쿤 91 분당 남", "베리 90 일산 남"],
+            admins: [],
+            blockedUsers: ["오픈채팅봇"],
+            blockedRooms: ["명령어"],
+            defaultAdmin: "방장"
+        };
+        
+        // 초기값 저장 (변경 감지용)
+        let initialValues = {};
+        
+        function checkPassword() {
+            const input = document.getElementById('passwordInput').value;
+            if (input === ADMIN_PASSWORD) {
+                document.getElementById('passwordModal').style.display = 'none';
+                document.getElementById('mainContent').style.display = 'block';
+                
+                // 기본값 설정
+                document.getElementById('defaultAdmin').value = settings.defaultAdmin;
+                
+                // 초기 렌더링
+                updateToggles();
+                renderSuperAdmins();
+                renderAdmins();
+                renderBlockedUsers();
+                renderBlockedRooms();
+                
+                loadSettings();
+                
+                // 초기값 저장 (변경 감지용)
+                saveInitialValues();
+            } else {
+                alert('❌ 암호가 틀렸습니다!');
+                document.getElementById('passwordInput').value = '';
+            }
+        }
+        
+        function saveInitialValues() {
+            initialValues = {
+                chatPoint: document.getElementById('chatPoint').value,
+                chatExp: document.getElementById('chatExp').value,
+                attendanceReward: document.getElementById('attendanceReward').value,
+                levelupReward: document.getElementById('levelupReward').value,
+                baseballReward: document.getElementById('baseballReward').value,
+                wordReward: document.getElementById('wordReward').value,
+                typingReward: document.getElementById('typingReward').value,
+                chosungReward: document.getElementById('chosungReward').value,
+                balanceReward: document.getElementById('balanceReward').value,
+                baseballExp: document.getElementById('baseballExp').value,
+                wordExp: document.getElementById('wordExp').value,
+                typingExp: document.getElementById('typingExp').value,
+                chosungExp: document.getElementById('chosungExp').value,
+                balanceExp: document.getElementById('balanceExp').value,
+                lottoExp: document.getElementById('lottoExp').value,
+                gambleMin: document.getElementById('gambleMin').value,
+                gambleMaxPercent: document.getElementById('gambleMaxPercent').value,
+                sutdaEntryFee: document.getElementById('sutdaEntryFee').value,
+                sutdaBonus: document.getElementById('sutdaBonus').value,
+                attendanceStartHour: document.getElementById('attendanceStartHour').value,
+                saveFrequency: document.getElementById('saveFrequency').value,
+                day7Bonus: document.getElementById('day7Bonus').value,
+                day14Bonus: document.getElementById('day14Bonus').value,
+                day21Bonus: document.getElementById('day21Bonus').value,
+                day28Bonus: document.getElementById('day28Bonus').value,
+                defaultAdmin: document.getElementById('defaultAdmin').value,
+                joinMessage: settings.joinMessage,
+                leaveMessage: settings.leaveMessage,
+                nicknameAlert: settings.nicknameAlert,
+                superAdmins: JSON.stringify(settings.superAdmins),
+                admins: JSON.stringify(settings.admins),
+                blockedUsers: JSON.stringify(settings.blockedUsers),
+                blockedRooms: JSON.stringify(settings.blockedRooms)
+            };
+        }
+        
+        document.getElementById('passwordInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') checkPassword();
+        });
+        
+        function switchTab(index) {
+            document.querySelectorAll('.tab').forEach((t, i) => {
+                t.classList.toggle('active', i === index);
+            });
+            document.querySelectorAll('.tab-content').forEach((t, i) => {
+                t.classList.toggle('active', i === index);
+            });
+        }
+        
+        function toggleSwitch(name) {
+            settings[name] = !settings[name];
+            updateToggles();
+        }
+        
+        function updateToggles() {
+            document.getElementById('joinMessageToggle').className = 'toggle' + (settings.joinMessage ? ' active' : '');
+            document.getElementById('leaveMessageToggle').className = 'toggle' + (settings.leaveMessage ? ' active' : '');
+            document.getElementById('nicknameAlertToggle').className = 'toggle' + (settings.nicknameAlert ? ' active' : '');
+        }
+        
+        function addSuperAdmin() {
+            const input = document.getElementById('superAdminInput');
+            const nick = input.value.trim().replace('@', '');
+            if (nick && !settings.superAdmins.includes(nick)) {
+                settings.superAdmins.push(nick);
+                input.value = '';
+                renderSuperAdmins();
+            }
+        }
+        
+        function removeSuperAdmin(nick) {
+            settings.superAdmins = settings.superAdmins.filter(n => n !== nick);
+            renderSuperAdmins();
+        }
+        
+        function renderSuperAdmins() {
+            // 추가/제거 리스트
+            const list = document.getElementById('superAdminList');
+            if (settings.superAdmins.length === 0) {
+                list.innerHTML = '<div class="empty-state">등록된 방장이 없습니다</div>';
+            } else {
+                list.innerHTML = settings.superAdmins.map(nick => 
+                    `<div class="list-item">
+                        <span>👑 ${nick}</span>
+                        <button class="btn-remove" onclick="removeSuperAdmin('${nick}')">제거</button>
+                    </div>`
+                ).join('');
+            }
+            
+            // 전체 명단 표시 (읽기 전용)
+            const listView = document.getElementById('superAdminListView');
+            const allSuperAdmins = [];
+            
+            // 기본 방장
+            const defaultAdmin = document.getElementById('defaultAdmin').value.trim();
+            if (defaultAdmin) {
+                allSuperAdmins.push({nick: defaultAdmin, type: '기본'});
+            }
+            
+            // 추가된 방장들
+            settings.superAdmins.forEach(nick => {
+                allSuperAdmins.push({nick: nick, type: '등록'});
+            });
+            
+            if (allSuperAdmins.length === 0) {
+                listView.innerHTML = '<div class="empty-state">등록된 방장이 없습니다</div>';
+            } else {
+                listView.innerHTML = allSuperAdmins.map(item => 
+                    `<div class="list-item">
+                        <span>👑 ${item.nick} <span style="font-size: 12px; color: #999;">(${item.type})</span></span>
+                    </div>`
+                ).join('');
+            }
+        }
+        
+        function addAdmin() {
+            const input = document.getElementById('adminInput');
+            const nick = input.value.trim().replace('@', '');
+            if (nick && !settings.admins.includes(nick)) {
+                settings.admins.push(nick);
+                input.value = '';
+                renderAdmins();
+            }
+        }
+        
+        function removeAdmin(nick) {
+            settings.admins = settings.admins.filter(n => n !== nick);
+            renderAdmins();
+        }
+        
+        function renderAdmins() {
+            // 추가/제거 리스트
+            const list = document.getElementById('adminList');
+            if (settings.admins.length === 0) {
+                list.innerHTML = '<div class="empty-state">등록된 관리자가 없습니다</div>';
+            } else {
+                list.innerHTML = settings.admins.map(nick => 
+                    `<div class="list-item">
+                        <span>🛡️ ${nick}</span>
+                        <button class="btn-remove" onclick="removeAdmin('${nick}')">제거</button>
+                    </div>`
+                ).join('');
+            }
+            
+            // 전체 명단 표시 (읽기 전용)
+            const listView = document.getElementById('adminListView');
+            if (settings.admins.length === 0) {
+                listView.innerHTML = '<div class="empty-state">등록된 관리자가 없습니다</div>';
+            } else {
+                listView.innerHTML = settings.admins.map(nick => 
+                    `<div class="list-item">
+                        <span>🛡️ ${nick}</span>
+                        <button class="btn-remove" onclick="removeAdmin('${nick}')">제거</button>
+                    </div>`
+                ).join('');
+            }
+        }
+        
+        function addBlockedUser() {
+            const input = document.getElementById('blockedUserInput');
+            const nick = input.value.trim().replace('@', '');
+            if (nick && !settings.blockedUsers.includes(nick)) {
+                settings.blockedUsers.push(nick);
+                input.value = '';
+                renderBlockedUsers();
+            }
+        }
+        
+        function removeBlockedUser(nick) {
+            settings.blockedUsers = settings.blockedUsers.filter(n => n !== nick);
+            renderBlockedUsers();
+        }
+        
+        function renderBlockedUsers() {
+            const list = document.getElementById('blockedUserList');
+            if (settings.blockedUsers.length === 0) {
+                list.innerHTML = '<div class="empty-state">차단된 유저가 없습니다</div>';
+                return;
+            }
+            list.innerHTML = settings.blockedUsers.map(nick => 
+                `<div class="list-item">
+                    <span>🚫 ${nick}</span>
+                    <button class="btn-remove" onclick="removeBlockedUser('${nick}')">해제</button>
+                </div>`
+            ).join('');
+        }
+        
+        function addBlockedRoom() {
+            const input = document.getElementById('blockedRoomInput');
+            const room = input.value.trim();
+            if (room && !settings.blockedRooms.includes(room)) {
+                settings.blockedRooms.push(room);
+                input.value = '';
+                renderBlockedRooms();
+            }
+        }
+        
+        function removeBlockedRoom(room) {
+            settings.blockedRooms = settings.blockedRooms.filter(r => r !== room);
+            renderBlockedRooms();
+        }
+        
+        function renderBlockedRooms() {
+            const list = document.getElementById('blockedRoomList');
+            if (settings.blockedRooms.length === 0) {
+                list.innerHTML = '<div class="empty-state">차단된 방이 없습니다</div>';
+                return;
+            }
+            list.innerHTML = settings.blockedRooms.map(room => 
+                `<div class="list-item">
+                    <span>🔒 ${room}</span>
+                    <button class="btn-remove" onclick="removeBlockedRoom('${room}')">해제</button>
+                </div>`
+            ).join('');
+        }
+        
+        function loadSettings() {
+            const saved = localStorage.getItem('botSettings');
+            if (saved) {
+                const data = JSON.parse(saved);
+                Object.keys(data).forEach(key => {
+                    const element = document.getElementById(key);
+                    if (element && element.type !== 'checkbox') {
+                        element.value = data[key];
+                    }
+                });
+                if (data.joinMessage !== undefined) settings.joinMessage = data.joinMessage;
+                if (data.leaveMessage !== undefined) settings.leaveMessage = data.leaveMessage;
+                if (data.nicknameAlert !== undefined) settings.nicknameAlert = data.nicknameAlert;
+                if (data.superAdmins) settings.superAdmins = data.superAdmins;
+                if (data.admins) settings.admins = data.admins;
+                if (data.blockedUsers) settings.blockedUsers = data.blockedUsers;
+                if (data.blockedRooms) settings.blockedRooms = data.blockedRooms;
+                if (data.defaultAdmin) settings.defaultAdmin = data.defaultAdmin;
+                
+                updateToggles();
+                renderSuperAdmins();
+                renderAdmins();
+                renderBlockedUsers();
+                renderBlockedRooms();
+            }
+        }
+        
+        function saveSettings() {
+            const botConfig = {
+                "포인트설정": {
+                    "CHAT_POINT": parseInt(document.getElementById('chatPoint').value) || 1,
+                    "CHAT_EXP": parseInt(document.getElementById('chatExp').value) || 1,
+                    "ATTENDANCE_REWARD": parseInt(document.getElementById('attendanceReward').value) || 100,
+                    "LEVELUP_REWARD": parseInt(document.getElementById('levelupReward').value) || 50,
+                    "RANDOM_POINT_BOX_CHANCE": 0.005
+                },
+                "게임보상": {
+                    "BASEBALL_REWARD": parseInt(document.getElementById('baseballReward').value) || 50,
+                    "WORD_REWARD": parseInt(document.getElementById('wordReward').value) || 20,
+                    "TYPING_REWARD": parseInt(document.getElementById('typingReward').value) || 30,
+                    "CHOSUNG_REWARD": parseInt(document.getElementById('chosungReward').value) || 15,
+                    "BALANCE_REWARD": parseInt(document.getElementById('balanceReward').value) || 100,
+                    "LOTTO_FIRST_PRIZE": 1000,
+                    "LOTTO_SECOND_PRIZE": 500,
+                    "LOTTO_THIRD_PRIZE": 100
+                },
+                "게임경험치": {
+                    "BASEBALL_EXP": parseInt(document.getElementById('baseballExp').value) || 30,
+                    "WORD_EXP": parseInt(document.getElementById('wordExp').value) || 30,
+                    "TYPING_EXP": parseInt(document.getElementById('typingExp').value) || 30,
+                    "CHOSUNG_EXP": parseInt(document.getElementById('chosungExp').value) || 20,
+                    "BALANCE_EXP": parseInt(document.getElementById('balanceExp').value) || 10,
+                    "LOTTO_EXP": parseInt(document.getElementById('lottoExp').value) || 50
+                },
+                "게임설정": {
+                    "GAMBLE_MIN": parseInt(document.getElementById('gambleMin').value) || 1000,
+                    "GAMBLE_MAX_PERCENT": parseInt(document.getElementById('gambleMaxPercent').value) || 100,
+                    "LOTTO_PRICE": 100,
+                    "SUTDA_ENTRY_FEE": parseInt(document.getElementById('sutdaEntryFee').value) || 100,
+                    "SUTDA_BONUS": parseInt(document.getElementById('sutdaBonus').value) || 50,
+                    "SUTDA_REFUND": 75
+                },
+                "시스템설정": {
+                    "ATTENDANCE_START_HOUR": parseInt(document.getElementById('attendanceStartHour').value) || 6,
+                    "SAVE_FREQUENCY": parseInt(document.getElementById('saveFrequency').value) || 20,
+                    "JOIN_MESSAGE_ENABLED": settings.joinMessage,
+                    "LEAVE_MESSAGE_ENABLED": settings.leaveMessage,
+                    "JOIN_COOLDOWN": 10000,
+                    "LEAVE_COOLDOWN": 10000,
+                    "NICKNAME_CHANGE_ALERT": settings.nicknameAlert
+                },
+                "출석보너스": {
+                    "DAY_7_BONUS": parseInt(document.getElementById('day7Bonus').value) || 50,
+                    "DAY_14_BONUS": parseInt(document.getElementById('day14Bonus').value) || 50,
+                    "DAY_21_BONUS": parseInt(document.getElementById('day21Bonus').value) || 50,
+                    "DAY_28_BONUS": parseInt(document.getElementById('day28Bonus').value) || 50
+                },
+                "명령어활성화": {
+                    "attendance": true,
+                    "gamble": true,
+                    "baseball": true,
+                    "lotto": true,
+                    "wordchain": true,
+                    "chosung": true,
+                    "typing": true,
+                    "sutda": true,
+                    "balance": true,
+                    "transfer": true,
+                    "shop": true
+                }
+            };
+            
+            const config = {
+                "admins": settings.admins,
+                "superAdmins": settings.superAdmins,
+                "DEFAULT_ADMIN": document.getElementById('defaultAdmin').value.trim() || "",
+                "blockedUsers": settings.blockedUsers,
+                "blockedRooms": settings.blockedRooms,
+                "ATTENDANCE_START_HOUR": botConfig.시스템설정.ATTENDANCE_START_HOUR,
+                "SAVE_FREQUENCY": botConfig.시스템설정.SAVE_FREQUENCY,
+                "CHAT_POINT": botConfig.포인트설정.CHAT_POINT,
+                "CHAT_EXP": botConfig.포인트설정.CHAT_EXP,
+                "RANDOM_POINT_BOX_CHANCE": 0.005,
+                "lottoTicketPrice": 85,
+                "lottoPrizes": {"first": 500, "second": 250},
+                "lastWeeklyReward": null,
+                "lastMonthlyReward": null
+            };
+            
+            localStorage.setItem('botSettings', JSON.stringify({
+                chatPoint: document.getElementById('chatPoint').value,
+                chatExp: document.getElementById('chatExp').value,
+                attendanceReward: document.getElementById('attendanceReward').value,
+                levelupReward: document.getElementById('levelupReward').value,
+                baseballReward: document.getElementById('baseballReward').value,
+                wordReward: document.getElementById('wordReward').value,
+                typingReward: document.getElementById('typingReward').value,
+                chosungReward: document.getElementById('chosungReward').value,
+                balanceReward: document.getElementById('balanceReward').value,
+                baseballExp: document.getElementById('baseballExp').value,
+                wordExp: document.getElementById('wordExp').value,
+                typingExp: document.getElementById('typingExp').value,
+                chosungExp: document.getElementById('chosungExp').value,
+                balanceExp: document.getElementById('balanceExp').value,
+                lottoExp: document.getElementById('lottoExp').value,
+                gambleMin: document.getElementById('gambleMin').value,
+                gambleMaxPercent: document.getElementById('gambleMaxPercent').value,
+                sutdaEntryFee: document.getElementById('sutdaEntryFee').value,
+                sutdaBonus: document.getElementById('sutdaBonus').value,
+                attendanceStartHour: document.getElementById('attendanceStartHour').value,
+                saveFrequency: document.getElementById('saveFrequency').value,
+                day7Bonus: document.getElementById('day7Bonus').value,
+                day14Bonus: document.getElementById('day14Bonus').value,
+                day21Bonus: document.getElementById('day21Bonus').value,
+                day28Bonus: document.getElementById('day28Bonus').value,
+                defaultAdmin: document.getElementById('defaultAdmin').value,
+                joinMessage: settings.joinMessage,
+                leaveMessage: settings.leaveMessage,
+                nicknameAlert: settings.nicknameAlert,
+                superAdmins: settings.superAdmins,
+                admins: settings.admins,
+                blockedUsers: settings.blockedUsers,
+                blockedRooms: settings.blockedRooms
+            }));
+            
+            // JSON 명령어 생성 (변경된 것만)
+            const batchCommand = {};
+            
+            // 포인트 변경 감지
+            const pointChanges = {};
+            if (botConfig.포인트설정.CHAT_POINT != initialValues.chatPoint) 
+                pointChanges.채팅포인트 = botConfig.포인트설정.CHAT_POINT;
+            if (botConfig.포인트설정.CHAT_EXP != initialValues.chatExp)
+                pointChanges.채팅경험치 = botConfig.포인트설정.CHAT_EXP;
+            if (botConfig.포인트설정.ATTENDANCE_REWARD != initialValues.attendanceReward)
+                pointChanges.출석보상 = botConfig.포인트설정.ATTENDANCE_REWARD;
+            if (botConfig.포인트설정.LEVELUP_REWARD != initialValues.levelupReward)
+                pointChanges.레벨업보상 = botConfig.포인트설정.LEVELUP_REWARD;
+            if (Object.keys(pointChanges).length > 0) batchCommand.포인트 = pointChanges;
+            
+            // 게임보상 변경 감지
+            const gameRewardChanges = {};
+            if (botConfig.게임보상.BASEBALL_REWARD != initialValues.baseballReward)
+                gameRewardChanges.야구 = botConfig.게임보상.BASEBALL_REWARD;
+            if (botConfig.게임보상.WORD_REWARD != initialValues.wordReward)
+                gameRewardChanges.끝말잇기 = botConfig.게임보상.WORD_REWARD;
+            if (botConfig.게임보상.TYPING_REWARD != initialValues.typingReward)
+                gameRewardChanges.타자 = botConfig.게임보상.TYPING_REWARD;
+            if (botConfig.게임보상.CHOSUNG_REWARD != initialValues.chosungReward)
+                gameRewardChanges.초성 = botConfig.게임보상.CHOSUNG_REWARD;
+            if (botConfig.게임보상.BALANCE_REWARD != initialValues.balanceReward)
+                gameRewardChanges.밸런스 = botConfig.게임보상.BALANCE_REWARD;
+            if (Object.keys(gameRewardChanges).length > 0) batchCommand.게임보상 = gameRewardChanges;
+            
+            // 게임경험치 변경 감지
+            const gameExpChanges = {};
+            if (botConfig.게임경험치.BASEBALL_EXP != initialValues.baseballExp)
+                gameExpChanges.야구 = botConfig.게임경험치.BASEBALL_EXP;
+            if (botConfig.게임경험치.WORD_EXP != initialValues.wordExp)
+                gameExpChanges.끝말잇기 = botConfig.게임경험치.WORD_EXP;
+            if (botConfig.게임경험치.TYPING_EXP != initialValues.typingExp)
+                gameExpChanges.타자 = botConfig.게임경험치.TYPING_EXP;
+            if (botConfig.게임경험치.CHOSUNG_EXP != initialValues.chosungExp)
+                gameExpChanges.초성 = botConfig.게임경험치.CHOSUNG_EXP;
+            if (botConfig.게임경험치.BALANCE_EXP != initialValues.balanceExp)
+                gameExpChanges.밸런스 = botConfig.게임경험치.BALANCE_EXP;
+            if (botConfig.게임경험치.LOTTO_EXP != initialValues.lottoExp)
+                gameExpChanges.로또 = botConfig.게임경험치.LOTTO_EXP;
+            if (Object.keys(gameExpChanges).length > 0) batchCommand.게임경험치 = gameExpChanges;
+            
+            // 게임설정 변경 감지
+            const gameSettingChanges = {};
+            if (botConfig.게임설정.GAMBLE_MIN != initialValues.gambleMin)
+                gameSettingChanges.도박최소 = botConfig.게임설정.GAMBLE_MIN;
+            if (botConfig.게임설정.GAMBLE_MAX_PERCENT != initialValues.gambleMaxPercent)
+                gameSettingChanges.도박변동률 = botConfig.게임설정.GAMBLE_MAX_PERCENT;
+            if (botConfig.게임설정.SUTDA_ENTRY_FEE != initialValues.sutdaEntryFee)
+                gameSettingChanges.섯다참가비 = botConfig.게임설정.SUTDA_ENTRY_FEE;
+            if (botConfig.게임설정.SUTDA_BONUS != initialValues.sutdaBonus)
+                gameSettingChanges.섯다보너스 = botConfig.게임설정.SUTDA_BONUS;
+            if (Object.keys(gameSettingChanges).length > 0) batchCommand.게임설정 = gameSettingChanges;
+            
+            // 시스템 변경 감지
+            const systemChanges = {};
+            if (botConfig.시스템설정.ATTENDANCE_START_HOUR != initialValues.attendanceStartHour)
+                systemChanges.출석시작시간 = botConfig.시스템설정.ATTENDANCE_START_HOUR;
+            if (botConfig.시스템설정.SAVE_FREQUENCY != initialValues.saveFrequency)
+                systemChanges.저장빈도 = botConfig.시스템설정.SAVE_FREQUENCY;
+            if (botConfig.시스템설정.JOIN_MESSAGE_ENABLED != initialValues.joinMessage)
+                systemChanges.입장메시지 = botConfig.시스템설정.JOIN_MESSAGE_ENABLED;
+            if (botConfig.시스템설정.LEAVE_MESSAGE_ENABLED != initialValues.leaveMessage)
+                systemChanges.퇴장메시지 = botConfig.시스템설정.LEAVE_MESSAGE_ENABLED;
+            if (Object.keys(systemChanges).length > 0) batchCommand.시스템 = systemChanges;
+            
+            // 출석보너스 변경 감지
+            const bonusChanges = {};
+            if (botConfig.출석보너스.DAY_7_BONUS != initialValues.day7Bonus)
+                bonusChanges.day7 = botConfig.출석보너스.DAY_7_BONUS;
+            if (botConfig.출석보너스.DAY_14_BONUS != initialValues.day14Bonus)
+                bonusChanges.day14 = botConfig.출석보너스.DAY_14_BONUS;
+            if (botConfig.출석보너스.DAY_21_BONUS != initialValues.day21Bonus)
+                bonusChanges.day21 = botConfig.출석보너스.DAY_21_BONUS;
+            if (botConfig.출석보너스.DAY_28_BONUS != initialValues.day28Bonus)
+                bonusChanges.day28 = botConfig.출석보너스.DAY_28_BONUS;
+            if (Object.keys(bonusChanges).length > 0) batchCommand.출석보너스 = bonusChanges;
+            
+            // 방장 변경 감지
+            const currentSuperAdmins = JSON.stringify(settings.superAdmins);
+            if (currentSuperAdmins !== initialValues.superAdmins) {
+                const initial = JSON.parse(initialValues.superAdmins);
+                const added = settings.superAdmins.filter(x => !initial.includes(x));
+                const removed = initial.filter(x => !settings.superAdmins.includes(x));
+                if (added.length > 0) batchCommand.방장추가 = added;
+                if (removed.length > 0) batchCommand.방장제거 = removed;
+            }
+            
+            // 관리자 변경 감지
+            const currentAdmins = JSON.stringify(settings.admins);
+            if (currentAdmins !== initialValues.admins) {
+                const initial = JSON.parse(initialValues.admins);
+                const added = settings.admins.filter(x => !initial.includes(x));
+                const removed = initial.filter(x => !settings.admins.includes(x));
+                if (added.length > 0) batchCommand.관리자추가 = added;
+                if (removed.length > 0) batchCommand.관리자제거 = removed;
+            }
+            
+            // 차단 변경 감지
+            const currentBlockedUsers = JSON.stringify(settings.blockedUsers);
+            if (currentBlockedUsers !== initialValues.blockedUsers) {
+                const initial = JSON.parse(initialValues.blockedUsers);
+                const added = settings.blockedUsers.filter(x => !initial.includes(x));
+                const removed = initial.filter(x => !settings.blockedUsers.includes(x));
+                if (added.length > 0) batchCommand.차단추가 = added;
+                if (removed.length > 0) batchCommand.차단해제 = removed;
+            }
+            
+            // 방차단 변경 감지
+            const currentBlockedRooms = JSON.stringify(settings.blockedRooms);
+            if (currentBlockedRooms !== initialValues.blockedRooms) {
+                const initial = JSON.parse(initialValues.blockedRooms);
+                const added = settings.blockedRooms.filter(x => !initial.includes(x));
+                const removed = initial.filter(x => !settings.blockedRooms.includes(x));
+                if (added.length > 0) batchCommand.방차단추가 = added;
+                if (removed.length > 0) batchCommand.방차단해제 = removed;
+            }
+            
+            // 기본방장 변경 감지
+            if (config.DEFAULT_ADMIN !== initialValues.defaultAdmin) {
+                batchCommand.기본방장 = config.DEFAULT_ADMIN;
+            }
+            
+            // 명령어 생성
+            let commandStr = "";
+            if (Object.keys(batchCommand).length === 0) {
+                commandStr = "변경된 설정이 없습니다.";
+            } else {
+                commandStr = ".일괄설정 " + JSON.stringify(batchCommand);
+            }
+            
+            document.getElementById('batchCommand').textContent = commandStr;
+            document.getElementById('saveModal').classList.add('show');
+        }
+        
+        function copyBatchCommand() {
+            const command = document.getElementById('batchCommand').textContent;
+            
+            navigator.clipboard.writeText(command).then(() => {
+                alert('✅ 명령어가 복사되었습니다!\n\n카톡에 붙여넣고 전송하세요!');
+            }).catch(() => {
+                alert('복사에 실패했습니다. 수동으로 복사해주세요.');
+            });
+        }
+        
+        function copyAllConfig() {
+            const botConfig = document.getElementById('botConfigCode').textContent;
+            const config = document.getElementById('configCode').textContent;
+            const combined = "=== botConfig.json ===\n\n" + botConfig + "\n\n=== config.json ===\n\n" + config;
+            
+            navigator.clipboard.writeText(combined).then(() => {
+                alert('✅ 설정이 복사되었습니다!\n\n각 파일에 맞는 내용을 붙여넣으세요.');
+            }).catch(() => {
+                alert('복사에 실패했습니다. 수동으로 복사해주세요.');
+            });
+        }
+        
+        
+        function closeModal() {
+            document.getElementById('saveModal').classList.remove('show');
+        }
+    </script>
+</body>
+</html>
