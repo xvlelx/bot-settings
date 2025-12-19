@@ -580,6 +580,24 @@
                     </div>
                     <div class="setting-item">
                         <div>
+                            <div class="setting-label">로또 티켓 가격</div>
+                        </div>
+                        <input type="number" id="lottoPrice" class="setting-input" min="0" value="100">
+                    </div>
+                    <div class="setting-item">
+                        <div>
+                            <div class="setting-label">로또 1등 상금</div>
+                        </div>
+                        <input type="number" id="lottoFirstPrize" class="setting-input" min="0" value="1000">
+                    </div>
+                    <div class="setting-item">
+                        <div>
+                            <div class="setting-label">로또 2등 상금</div>
+                        </div>
+                        <input type="number" id="lottoSecondPrize" class="setting-input" min="0" value="500">
+                    </div>
+                    <div class="setting-item">
+                        <div>
                             <div class="setting-label">섯다 참가비</div>
                         </div>
                         <input type="number" id="sutdaEntryFee" class="setting-input" min="0" value="100">
@@ -639,18 +657,6 @@
                     </div>
                 </div>
                 
-                <div class="section">
-                    <div class="section-header">
-                        <div class="section-title">🔑 기본 방장</div>
-                    </div>
-                    <div class="setting-item">
-                        <div>
-                            <div class="setting-label">기본 방장 닉네임</div>
-                            <div class="setting-desc">하드코딩된 방장</div>
-                        </div>
-                        <input type="text" id="defaultAdmin" class="setting-input setting-input-wide" placeholder="닉네임" onchange="renderSuperAdmins()">
-                    </div>
-                </div>
             </div>
             
             <!-- 탭 5: 차단 관리 -->
@@ -722,7 +728,6 @@
             admins: [],
             blockedUsers: ["오픈채팅봇"],
             blockedRooms: ["명령어"],
-            defaultAdmin: "방장"
         };
         
         // 초기값 저장 (변경 감지용)
@@ -735,7 +740,6 @@
                 document.getElementById('mainContent').style.display = 'block';
                 
                 // 기본값 설정
-                document.getElementById('defaultAdmin').value = settings.defaultAdmin;
                 
                 // 초기 렌더링
                 updateToggles();
@@ -773,6 +777,9 @@
                 lottoExp: document.getElementById('lottoExp').value,
                 gambleMin: document.getElementById('gambleMin').value,
                 gambleMaxPercent: document.getElementById('gambleMaxPercent').value,
+                lottoPrice: document.getElementById('lottoPrice').value,
+                lottoFirstPrize: document.getElementById('lottoFirstPrize').value,
+                lottoSecondPrize: document.getElementById('lottoSecondPrize').value,
                 sutdaEntryFee: document.getElementById('sutdaEntryFee').value,
                 sutdaBonus: document.getElementById('sutdaBonus').value,
                 attendanceStartHour: document.getElementById('attendanceStartHour').value,
@@ -781,7 +788,6 @@
                 day14Bonus: document.getElementById('day14Bonus').value,
                 day21Bonus: document.getElementById('day21Bonus').value,
                 day28Bonus: document.getElementById('day28Bonus').value,
-                defaultAdmin: document.getElementById('defaultAdmin').value,
                 joinMessage: settings.joinMessage,
                 leaveMessage: settings.leaveMessage,
                 nicknameAlert: settings.nicknameAlert,
@@ -848,12 +854,6 @@
             // 전체 명단 표시 (읽기 전용)
             const listView = document.getElementById('superAdminListView');
             const allSuperAdmins = [];
-            
-            // 기본 방장
-            const defaultAdmin = document.getElementById('defaultAdmin').value.trim();
-            if (defaultAdmin) {
-                allSuperAdmins.push({nick: defaultAdmin, type: '기본'});
-            }
             
             // 추가된 방장들
             settings.superAdmins.forEach(nick => {
@@ -989,7 +989,6 @@
                 if (data.admins) settings.admins = data.admins;
                 if (data.blockedUsers) settings.blockedUsers = data.blockedUsers;
                 if (data.blockedRooms) settings.blockedRooms = data.blockedRooms;
-                if (data.defaultAdmin) settings.defaultAdmin = data.defaultAdmin;
                 
                 updateToggles();
                 renderSuperAdmins();
@@ -1016,7 +1015,6 @@
                     "BALANCE_REWARD": parseInt(document.getElementById('balanceReward').value) || 100,
                     "LOTTO_FIRST_PRIZE": 1000,
                     "LOTTO_SECOND_PRIZE": 500,
-                    "LOTTO_THIRD_PRIZE": 100
                 },
                 "게임경험치": {
                     "BASEBALL_EXP": parseInt(document.getElementById('baseballExp').value) || 30,
@@ -1029,7 +1027,9 @@
                 "게임설정": {
                     "GAMBLE_MIN": parseInt(document.getElementById('gambleMin').value) || 1000,
                     "GAMBLE_MAX_PERCENT": parseInt(document.getElementById('gambleMaxPercent').value) || 100,
-                    "LOTTO_PRICE": 100,
+                    "LOTTO_PRICE": parseInt(document.getElementById('lottoPrice').value) || 100,
+                    "LOTTO_FIRST_PRIZE": parseInt(document.getElementById('lottoFirstPrize').value) || 1000,
+                    "LOTTO_SECOND_PRIZE": parseInt(document.getElementById('lottoSecondPrize').value) || 500,
                     "SUTDA_ENTRY_FEE": parseInt(document.getElementById('sutdaEntryFee').value) || 100,
                     "SUTDA_BONUS": parseInt(document.getElementById('sutdaBonus').value) || 50,
                     "SUTDA_REFUND": 75
@@ -1067,7 +1067,6 @@
             const config = {
                 "admins": settings.admins,
                 "superAdmins": settings.superAdmins,
-                "DEFAULT_ADMIN": document.getElementById('defaultAdmin').value.trim() || "",
                 "blockedUsers": settings.blockedUsers,
                 "blockedRooms": settings.blockedRooms,
                 "ATTENDANCE_START_HOUR": botConfig.시스템설정.ATTENDANCE_START_HOUR,
@@ -1099,6 +1098,9 @@
                 lottoExp: document.getElementById('lottoExp').value,
                 gambleMin: document.getElementById('gambleMin').value,
                 gambleMaxPercent: document.getElementById('gambleMaxPercent').value,
+                lottoPrice: document.getElementById('lottoPrice').value,
+                lottoFirstPrize: document.getElementById('lottoFirstPrize').value,
+                lottoSecondPrize: document.getElementById('lottoSecondPrize').value,
                 sutdaEntryFee: document.getElementById('sutdaEntryFee').value,
                 sutdaBonus: document.getElementById('sutdaBonus').value,
                 attendanceStartHour: document.getElementById('attendanceStartHour').value,
@@ -1107,7 +1109,6 @@
                 day14Bonus: document.getElementById('day14Bonus').value,
                 day21Bonus: document.getElementById('day21Bonus').value,
                 day28Bonus: document.getElementById('day28Bonus').value,
-                defaultAdmin: document.getElementById('defaultAdmin').value,
                 joinMessage: settings.joinMessage,
                 leaveMessage: settings.leaveMessage,
                 nicknameAlert: settings.nicknameAlert,
@@ -1168,6 +1169,12 @@
                 gameSettingChanges.도박최소 = botConfig.게임설정.GAMBLE_MIN;
             if (botConfig.게임설정.GAMBLE_MAX_PERCENT != initialValues.gambleMaxPercent)
                 gameSettingChanges.도박변동률 = botConfig.게임설정.GAMBLE_MAX_PERCENT;
+            if (botConfig.게임설정.LOTTO_PRICE != initialValues.lottoPrice)
+                gameSettingChanges.로또가격 = botConfig.게임설정.LOTTO_PRICE;
+            if (botConfig.게임설정.LOTTO_FIRST_PRIZE != initialValues.lottoFirstPrize)
+                gameSettingChanges.로또1등 = botConfig.게임설정.LOTTO_FIRST_PRIZE;
+            if (botConfig.게임설정.LOTTO_SECOND_PRIZE != initialValues.lottoSecondPrize)
+                gameSettingChanges.로또2등 = botConfig.게임설정.LOTTO_SECOND_PRIZE;
             if (botConfig.게임설정.SUTDA_ENTRY_FEE != initialValues.sutdaEntryFee)
                 gameSettingChanges.섯다참가비 = botConfig.게임설정.SUTDA_ENTRY_FEE;
             if (botConfig.게임설정.SUTDA_BONUS != initialValues.sutdaBonus)
@@ -1236,11 +1243,6 @@
                 const removed = initial.filter(x => !settings.blockedRooms.includes(x));
                 if (added.length > 0) batchCommand.방차단추가 = added;
                 if (removed.length > 0) batchCommand.방차단해제 = removed;
-            }
-            
-            // 기본방장 변경 감지
-            if (config.DEFAULT_ADMIN !== initialValues.defaultAdmin) {
-                batchCommand.기본방장 = config.DEFAULT_ADMIN;
             }
             
             // 명령어 생성
