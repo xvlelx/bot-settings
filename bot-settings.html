@@ -360,8 +360,9 @@
             <div class="tab active" onclick="switchTab(0)">⚙️ 기본설정</div>
             <div class="tab" onclick="switchTab(1)">💰 포인트</div>
             <div class="tab" onclick="switchTab(2)">🎮 게임</div>
-            <div class="tab" onclick="switchTab(3)">👥 방장</div>
-            <div class="tab" onclick="switchTab(4)">🚫 차단</div>
+            <div class="tab" onclick="switchTab(3)">🔧 기능활성화</div>
+            <div class="tab" onclick="switchTab(4)">👥 방장</div>
+            <div class="tab" onclick="switchTab(5)">🚫 차단</div>
         </div>
         
         <div class="container">
@@ -611,8 +612,319 @@
                 </div>
             </div>
             
-            <!-- 탭 4: 관리자 관리 -->
+            <!-- 탭 3: 기능활성화 -->
             <div class="tab-content" id="tab3">
+                <div class="section">
+                    <div class="section-header">
+                        <div class="section-title">🎯 핵심 시스템</div>
+                        <div class="section-desc">봇의 핵심 기능을 개별적으로 켜고 끌 수 있습니다</div>
+                    </div>
+                    <div class="settings-group">
+                        <div class="setting-item">
+                            <div class="setting-label">출석 시스템</div>
+                            <label class="switch">
+                                <input type="checkbox" id="ATTENDANCE_ENABLED" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <div class="setting-label">포인트 시스템</div>
+                            <label class="switch">
+                                <input type="checkbox" id="POINT_SYSTEM_ENABLED" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <div class="setting-label">레벨 시스템</div>
+                            <label class="switch">
+                                <input type="checkbox" id="LEVEL_SYSTEM_ENABLED" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <div class="setting-label">칭호 시스템</div>
+                            <label class="switch">
+                                <input type="checkbox" id="TITLE_SYSTEM_ENABLED" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <div class="setting-label">자동 칭호 부여</div>
+                            <label class="switch">
+                                <input type="checkbox" id="TITLE_AUTO_ENABLED" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <div class="setting-label">유저 칭호 사용</div>
+                            <label class="switch">
+                                <input type="checkbox" id="TITLE_USER_ENABLED" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <div class="setting-label">채팅 카운트</div>
+                            <label class="switch">
+                                <input type="checkbox" id="CHAT_COUNT_ENABLED" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-header">
+                        <div class="section-title">💸 경제 시스템</div>
+                        <div class="section-desc">포인트 관련 기능</div>
+                    </div>
+                    <div class="settings-group">
+                        <div class="setting-item">
+                            <div class="setting-label">이체 기능</div>
+                            <label class="switch">
+                                <input type="checkbox" id="TRANSFER_ENABLED" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <div class="setting-label">도박 기능</div>
+                            <label class="switch">
+                                <input type="checkbox" id="GAMBLE_ENABLED" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-header">
+                        <div class="section-title">🎮 게임 시스템</div>
+                        <div class="section-desc">각 게임을 개별적으로 활성화/비활성화</div>
+                    </div>
+                    <div class="settings-group">
+                        <div class="setting-item">
+                            <div class="setting-label">야구 게임</div>
+                            <label class="switch">
+                                <input type="checkbox" id="GAME_BASEBALL_ENABLED" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <div class="setting-label">로또</div>
+                            <label class="switch">
+                                <input type="checkbox" id="GAME_LOTTO_ENABLED" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <div class="setting-label">끝말잇기</div>
+                            <label class="switch">
+                                <input type="checkbox" id="GAME_WORDCHAIN_ENABLED" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <div class="setting-label">초성 게임</div>
+                            <label class="switch">
+                                <input type="checkbox" id="GAME_CHOSUNG_ENABLED" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <div class="setting-label">타자 게임</div>
+                            <label class="switch">
+                                <input type="checkbox" id="GAME_TYPING_ENABLED" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <div class="setting-label">섯다</div>
+                            <label class="switch">
+                                <input type="checkbox" id="GAME_SUTDA_ENABLED" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <div class="setting-label">밸런스 게임</div>
+                            <label class="switch">
+                                <input type="checkbox" id="GAME_BALANCE_ENABLED" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-header">
+                        <div class="section-title">🛒 상점 & 기타</div>
+                        <div class="section-desc">상점, 메뉴, 학습 기능</div>
+                    </div>
+                    <div class="settings-group">
+                        <div class="setting-item">
+                            <div class="setting-label">상점 시스템</div>
+                            <label class="switch">
+                                <input type="checkbox" id="SHOP_ENABLED" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <div class="setting-label">상점 구매</div>
+                            <label class="switch">
+                                <input type="checkbox" id="SHOP_BUY_ENABLED" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <div class="setting-label">아이템 사용</div>
+                            <label class="switch">
+                                <input type="checkbox" id="SHOP_USE_ENABLED" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <div class="setting-label">메뉴 시스템</div>
+                            <label class="switch">
+                                <input type="checkbox" id="MENU_ENABLED" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <div class="setting-label">랜덤 메뉴</div>
+                            <label class="switch">
+                                <input type="checkbox" id="MENU_RANDOM_ENABLED" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <div class="setting-label">가르치기 기능</div>
+                            <label class="switch">
+                                <input type="checkbox" id="TEACH_ENABLED" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-header">
+                        <div class="section-title">📊 순위 시스템</div>
+                        <div class="section-desc">각종 순위 표시 기능</div>
+                    </div>
+                    <div class="settings-group">
+                        <div class="setting-item">
+                            <div class="setting-label">순위 시스템</div>
+                            <label class="switch">
+                                <input type="checkbox" id="RANK_ENABLED" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <div class="setting-label">포인트 순위</div>
+                            <label class="switch">
+                                <input type="checkbox" id="RANK_POINT_ENABLED" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <div class="setting-label">채팅 순위</div>
+                            <label class="switch">
+                                <input type="checkbox" id="RANK_CHAT_ENABLED" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <div class="setting-label">레벨 순위</div>
+                            <label class="switch">
+                                <input type="checkbox" id="RANK_LEVEL_ENABLED" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <div class="setting-label">게임 승리 순위</div>
+                            <label class="switch">
+                                <input type="checkbox" id="RANK_GAME_ENABLED" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <div class="setting-label">정보 조회</div>
+                            <label class="switch">
+                                <input type="checkbox" id="INFO_ENABLED" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-header">
+                        <div class="section-title">🔔 알림 & 감지</div>
+                        <div class="section-desc">멘션, 프로필 변경 감지 등</div>
+                    </div>
+                    <div class="settings-group">
+                        <div class="setting-item">
+                            <div class="setting-label">멘션 시스템</div>
+                            <label class="switch">
+                                <input type="checkbox" id="MENTION_ENABLED" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <div class="setting-label">멘션 알림</div>
+                            <label class="switch">
+                                <input type="checkbox" id="MENTION_NOTIFICATION" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <div class="setting-label">프로필 감지</div>
+                            <label class="switch">
+                                <input type="checkbox" id="PROFILE_DETECTION_ENABLED" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <div class="setting-label">닉네임 변경 감지</div>
+                            <label class="switch">
+                                <input type="checkbox" id="PROFILE_NICKNAME_DETECTION" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <div class="setting-label">프로필 변경 알림</div>
+                            <label class="switch">
+                                <input type="checkbox" id="PROFILE_CHANGE_NOTIFICATION" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <div class="setting-label">비활성 유저 추적</div>
+                            <label class="switch">
+                                <input type="checkbox" id="INACTIVE_USER_TRACKING" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-header">
+                        <div class="section-title">⚙️ 관리 기능</div>
+                        <div class="section-desc">관리자 전용 기능</div>
+                    </div>
+                    <div class="settings-group">
+                        <div class="setting-item">
+                            <div class="setting-label">관리자 컨트롤</div>
+                            <label class="switch">
+                                <input type="checkbox" id="ADMIN_CONTROLS_ENABLED" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 탭 4: 관리자 관리 -->
+            <div class="tab-content" id="tab4">
                 <div class="section">
                     <div class="section-header">
                         <div class="section-title">👑 방장 목록</div>
@@ -660,7 +972,7 @@
             </div>
             
             <!-- 탭 5: 차단 관리 -->
-            <div class="tab-content" id="tab4">
+            <div class="tab-content" id="tab5">
                 <div class="section">
                     <div class="section-header">
                         <div class="section-title">🚫 차단된 유저</div>
@@ -990,6 +1302,30 @@
                 if (data.blockedUsers) settings.blockedUsers = data.blockedUsers;
                 if (data.blockedRooms) settings.blockedRooms = data.blockedRooms;
                 
+                // 기능활성화 체크박스 복원
+                const featureToggles = [
+                    'ATTENDANCE_ENABLED', 'POINT_SYSTEM_ENABLED', 'LEVEL_SYSTEM_ENABLED',
+                    'TITLE_SYSTEM_ENABLED', 'TITLE_AUTO_ENABLED', 'TITLE_USER_ENABLED',
+                    'CHAT_COUNT_ENABLED', 'TRANSFER_ENABLED', 'GAMBLE_ENABLED',
+                    'GAME_BASEBALL_ENABLED', 'GAME_LOTTO_ENABLED', 'GAME_WORDCHAIN_ENABLED',
+                    'GAME_CHOSUNG_ENABLED', 'GAME_TYPING_ENABLED', 'GAME_SUTDA_ENABLED',
+                    'GAME_BALANCE_ENABLED', 'SHOP_ENABLED', 'SHOP_BUY_ENABLED',
+                    'SHOP_USE_ENABLED', 'MENU_ENABLED', 'MENU_RANDOM_ENABLED',
+                    'TEACH_ENABLED', 'RANK_ENABLED', 'RANK_POINT_ENABLED',
+                    'RANK_CHAT_ENABLED', 'RANK_LEVEL_ENABLED', 'RANK_GAME_ENABLED',
+                    'INFO_ENABLED', 'MENTION_ENABLED', 'MENTION_NOTIFICATION',
+                    'PROFILE_DETECTION_ENABLED', 'PROFILE_NICKNAME_DETECTION',
+                    'PROFILE_CHANGE_NOTIFICATION', 'INACTIVE_USER_TRACKING',
+                    'ADMIN_CONTROLS_ENABLED'
+                ];
+                
+                featureToggles.forEach(key => {
+                    const element = document.getElementById(key);
+                    if (element && data[key] !== undefined) {
+                        element.checked = data[key];
+                    }
+                });
+                
                 updateToggles();
                 renderSuperAdmins();
                 renderAdmins();
@@ -1061,6 +1397,44 @@
                     "balance": true,
                     "transfer": true,
                     "shop": true
+                },
+                "기능활성화": {
+                    "ATTENDANCE_ENABLED": document.getElementById('ATTENDANCE_ENABLED')?.checked ?? true,
+                    "POINT_SYSTEM_ENABLED": document.getElementById('POINT_SYSTEM_ENABLED')?.checked ?? true,
+                    "LEVEL_SYSTEM_ENABLED": document.getElementById('LEVEL_SYSTEM_ENABLED')?.checked ?? true,
+                    "TITLE_SYSTEM_ENABLED": document.getElementById('TITLE_SYSTEM_ENABLED')?.checked ?? true,
+                    "TITLE_AUTO_ENABLED": document.getElementById('TITLE_AUTO_ENABLED')?.checked ?? true,
+                    "TITLE_USER_ENABLED": document.getElementById('TITLE_USER_ENABLED')?.checked ?? true,
+                    "CHAT_COUNT_ENABLED": document.getElementById('CHAT_COUNT_ENABLED')?.checked ?? true,
+                    "TRANSFER_ENABLED": document.getElementById('TRANSFER_ENABLED')?.checked ?? true,
+                    "GAMBLE_ENABLED": document.getElementById('GAMBLE_ENABLED')?.checked ?? true,
+                    "GAME_BASEBALL_ENABLED": document.getElementById('GAME_BASEBALL_ENABLED')?.checked ?? true,
+                    "GAME_LOTTO_ENABLED": document.getElementById('GAME_LOTTO_ENABLED')?.checked ?? true,
+                    "GAME_WORDCHAIN_ENABLED": document.getElementById('GAME_WORDCHAIN_ENABLED')?.checked ?? true,
+                    "GAME_CHOSUNG_ENABLED": document.getElementById('GAME_CHOSUNG_ENABLED')?.checked ?? true,
+                    "GAME_TYPING_ENABLED": document.getElementById('GAME_TYPING_ENABLED')?.checked ?? true,
+                    "GAME_SUTDA_ENABLED": document.getElementById('GAME_SUTDA_ENABLED')?.checked ?? true,
+                    "GAME_BALANCE_ENABLED": document.getElementById('GAME_BALANCE_ENABLED')?.checked ?? true,
+                    "SHOP_ENABLED": document.getElementById('SHOP_ENABLED')?.checked ?? true,
+                    "SHOP_BUY_ENABLED": document.getElementById('SHOP_BUY_ENABLED')?.checked ?? true,
+                    "SHOP_USE_ENABLED": document.getElementById('SHOP_USE_ENABLED')?.checked ?? true,
+                    "MENU_ENABLED": document.getElementById('MENU_ENABLED')?.checked ?? true,
+                    "MENU_RANDOM_ENABLED": document.getElementById('MENU_RANDOM_ENABLED')?.checked ?? true,
+                    "TEACH_ENABLED": document.getElementById('TEACH_ENABLED')?.checked ?? true,
+                    "RANK_ENABLED": document.getElementById('RANK_ENABLED')?.checked ?? true,
+                    "RANK_POINT_ENABLED": document.getElementById('RANK_POINT_ENABLED')?.checked ?? true,
+                    "RANK_CHAT_ENABLED": document.getElementById('RANK_CHAT_ENABLED')?.checked ?? true,
+                    "RANK_LEVEL_ENABLED": document.getElementById('RANK_LEVEL_ENABLED')?.checked ?? true,
+                    "RANK_GAME_ENABLED": document.getElementById('RANK_GAME_ENABLED')?.checked ?? true,
+                    "INFO_ENABLED": document.getElementById('INFO_ENABLED')?.checked ?? true,
+                    "MENTION_ENABLED": document.getElementById('MENTION_ENABLED')?.checked ?? true,
+                    "MENTION_NOTIFICATION": document.getElementById('MENTION_NOTIFICATION')?.checked ?? true,
+                    "PROFILE_DETECTION_ENABLED": document.getElementById('PROFILE_DETECTION_ENABLED')?.checked ?? true,
+                    "PROFILE_NICKNAME_DETECTION": document.getElementById('PROFILE_NICKNAME_DETECTION')?.checked ?? true,
+                    "PROFILE_CHANGE_NOTIFICATION": document.getElementById('PROFILE_CHANGE_NOTIFICATION')?.checked ?? true,
+                    "INACTIVE_USER_TRACKING": document.getElementById('INACTIVE_USER_TRACKING')?.checked ?? true,
+                    "ADMIN_CONTROLS_ENABLED": document.getElementById('ADMIN_CONTROLS_ENABLED')?.checked ?? true,
+                    "RESET_MODE": "기본"
                 }
             };
             
@@ -1115,7 +1489,43 @@
                 superAdmins: settings.superAdmins,
                 admins: settings.admins,
                 blockedUsers: settings.blockedUsers,
-                blockedRooms: settings.blockedRooms
+                blockedRooms: settings.blockedRooms,
+                // 기능활성화 체크박스 상태
+                ATTENDANCE_ENABLED: document.getElementById('ATTENDANCE_ENABLED')?.checked ?? true,
+                POINT_SYSTEM_ENABLED: document.getElementById('POINT_SYSTEM_ENABLED')?.checked ?? true,
+                LEVEL_SYSTEM_ENABLED: document.getElementById('LEVEL_SYSTEM_ENABLED')?.checked ?? true,
+                TITLE_SYSTEM_ENABLED: document.getElementById('TITLE_SYSTEM_ENABLED')?.checked ?? true,
+                TITLE_AUTO_ENABLED: document.getElementById('TITLE_AUTO_ENABLED')?.checked ?? true,
+                TITLE_USER_ENABLED: document.getElementById('TITLE_USER_ENABLED')?.checked ?? true,
+                CHAT_COUNT_ENABLED: document.getElementById('CHAT_COUNT_ENABLED')?.checked ?? true,
+                TRANSFER_ENABLED: document.getElementById('TRANSFER_ENABLED')?.checked ?? true,
+                GAMBLE_ENABLED: document.getElementById('GAMBLE_ENABLED')?.checked ?? true,
+                GAME_BASEBALL_ENABLED: document.getElementById('GAME_BASEBALL_ENABLED')?.checked ?? true,
+                GAME_LOTTO_ENABLED: document.getElementById('GAME_LOTTO_ENABLED')?.checked ?? true,
+                GAME_WORDCHAIN_ENABLED: document.getElementById('GAME_WORDCHAIN_ENABLED')?.checked ?? true,
+                GAME_CHOSUNG_ENABLED: document.getElementById('GAME_CHOSUNG_ENABLED')?.checked ?? true,
+                GAME_TYPING_ENABLED: document.getElementById('GAME_TYPING_ENABLED')?.checked ?? true,
+                GAME_SUTDA_ENABLED: document.getElementById('GAME_SUTDA_ENABLED')?.checked ?? true,
+                GAME_BALANCE_ENABLED: document.getElementById('GAME_BALANCE_ENABLED')?.checked ?? true,
+                SHOP_ENABLED: document.getElementById('SHOP_ENABLED')?.checked ?? true,
+                SHOP_BUY_ENABLED: document.getElementById('SHOP_BUY_ENABLED')?.checked ?? true,
+                SHOP_USE_ENABLED: document.getElementById('SHOP_USE_ENABLED')?.checked ?? true,
+                MENU_ENABLED: document.getElementById('MENU_ENABLED')?.checked ?? true,
+                MENU_RANDOM_ENABLED: document.getElementById('MENU_RANDOM_ENABLED')?.checked ?? true,
+                TEACH_ENABLED: document.getElementById('TEACH_ENABLED')?.checked ?? true,
+                RANK_ENABLED: document.getElementById('RANK_ENABLED')?.checked ?? true,
+                RANK_POINT_ENABLED: document.getElementById('RANK_POINT_ENABLED')?.checked ?? true,
+                RANK_CHAT_ENABLED: document.getElementById('RANK_CHAT_ENABLED')?.checked ?? true,
+                RANK_LEVEL_ENABLED: document.getElementById('RANK_LEVEL_ENABLED')?.checked ?? true,
+                RANK_GAME_ENABLED: document.getElementById('RANK_GAME_ENABLED')?.checked ?? true,
+                INFO_ENABLED: document.getElementById('INFO_ENABLED')?.checked ?? true,
+                MENTION_ENABLED: document.getElementById('MENTION_ENABLED')?.checked ?? true,
+                MENTION_NOTIFICATION: document.getElementById('MENTION_NOTIFICATION')?.checked ?? true,
+                PROFILE_DETECTION_ENABLED: document.getElementById('PROFILE_DETECTION_ENABLED')?.checked ?? true,
+                PROFILE_NICKNAME_DETECTION: document.getElementById('PROFILE_NICKNAME_DETECTION')?.checked ?? true,
+                PROFILE_CHANGE_NOTIFICATION: document.getElementById('PROFILE_CHANGE_NOTIFICATION')?.checked ?? true,
+                INACTIVE_USER_TRACKING: document.getElementById('INACTIVE_USER_TRACKING')?.checked ?? true,
+                ADMIN_CONTROLS_ENABLED: document.getElementById('ADMIN_CONTROLS_ENABLED')?.checked ?? true
             }));
             
             // JSON 명령어 생성 (변경된 것만)
