@@ -612,6 +612,79 @@
                 </div>
             </div>
             
+            <!-- 복권 설정 섹션 -->
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-title">🎰 긁는 복권</div>
+                    <div class="section-desc">스크래치 복권 보상 및 제한 설정</div>
+                </div>
+                <div class="settings-group">
+                    <div class="setting-item">
+                        <div>
+                            <div class="setting-label">하루 무료 티켓</div>
+                            <div class="setting-desc">매일 무료로 받을 수 있는 복권 개수</div>
+                        </div>
+                        <input type="number" id="dailyFreeTickets" class="setting-input" min="1" max="10" value="3">
+                    </div>
+                </div>
+                
+                <div class="settings-group">
+                    <div class="setting-group-title">💰 포인트 보상</div>
+                    <div class="setting-item">
+                        <div>
+                            <div class="setting-label">3개 일치</div>
+                        </div>
+                        <input type="number" id="scratchMatch3Points" class="setting-input" min="0" value="1000">
+                    </div>
+                    <div class="setting-item">
+                        <div>
+                            <div class="setting-label">4개 일치</div>
+                        </div>
+                        <input type="number" id="scratchMatch4Points" class="setting-input" min="0" value="2000">
+                    </div>
+                    <div class="setting-item">
+                        <div>
+                            <div class="setting-label">5개 일치</div>
+                        </div>
+                        <input type="number" id="scratchMatch5Points" class="setting-input" min="0" value="5000">
+                    </div>
+                    <div class="setting-item">
+                        <div>
+                            <div class="setting-label">6개 일치 (대박!)</div>
+                        </div>
+                        <input type="number" id="scratchMatch6Points" class="setting-input" min="0" value="10000">
+                    </div>
+                </div>
+                
+                <div class="settings-group">
+                    <div class="setting-group-title">⭐ 경험치 보상</div>
+                    <div class="setting-item">
+                        <div>
+                            <div class="setting-label">3개 일치</div>
+                        </div>
+                        <input type="number" id="scratchMatch3Exp" class="setting-input" min="0" value="50">
+                    </div>
+                    <div class="setting-item">
+                        <div>
+                            <div class="setting-label">4개 일치</div>
+                        </div>
+                        <input type="number" id="scratchMatch4Exp" class="setting-input" min="0" value="100">
+                    </div>
+                    <div class="setting-item">
+                        <div>
+                            <div class="setting-label">5개 일치</div>
+                        </div>
+                        <input type="number" id="scratchMatch5Exp" class="setting-input" min="0" value="200">
+                    </div>
+                    <div class="setting-item">
+                        <div>
+                            <div class="setting-label">6개 일치 (대박!)</div>
+                        </div>
+                        <input type="number" id="scratchMatch6Exp" class="setting-input" min="0" value="500">
+                    </div>
+                </div>
+            </div>
+            
             <!-- 탭 3: 기능활성화 -->
             <div class="tab-content" id="tab3">
                 <div class="section">
@@ -1370,6 +1443,17 @@
                     "SUTDA_BONUS": parseInt(document.getElementById('sutdaBonus').value) || 50,
                     "SUTDA_REFUND": 75
                 },
+                "복권설정": {
+                    "DAILY_FREE_TICKETS": parseInt(document.getElementById('dailyFreeTickets').value) || 3,
+                    "SCRATCH_MATCH_3_POINTS": parseInt(document.getElementById('scratchMatch3Points').value) || 1000,
+                    "SCRATCH_MATCH_4_POINTS": parseInt(document.getElementById('scratchMatch4Points').value) || 2000,
+                    "SCRATCH_MATCH_5_POINTS": parseInt(document.getElementById('scratchMatch5Points').value) || 5000,
+                    "SCRATCH_MATCH_6_POINTS": parseInt(document.getElementById('scratchMatch6Points').value) || 10000,
+                    "SCRATCH_MATCH_3_EXP": parseInt(document.getElementById('scratchMatch3Exp').value) || 50,
+                    "SCRATCH_MATCH_4_EXP": parseInt(document.getElementById('scratchMatch4Exp').value) || 100,
+                    "SCRATCH_MATCH_5_EXP": parseInt(document.getElementById('scratchMatch5Exp').value) || 200,
+                    "SCRATCH_MATCH_6_EXP": parseInt(document.getElementById('scratchMatch6Exp').value) || 500
+                },
                 "시스템설정": {
                     "ATTENDANCE_START_HOUR": parseInt(document.getElementById('attendanceStartHour').value) || 6,
                     "SAVE_FREQUENCY": parseInt(document.getElementById('saveFrequency').value) || 20,
@@ -1477,6 +1561,16 @@
                 lottoSecondPrize: document.getElementById('lottoSecondPrize').value,
                 sutdaEntryFee: document.getElementById('sutdaEntryFee').value,
                 sutdaBonus: document.getElementById('sutdaBonus').value,
+                // 복권 설정
+                dailyFreeTickets: document.getElementById('dailyFreeTickets').value,
+                scratchMatch3Points: document.getElementById('scratchMatch3Points').value,
+                scratchMatch4Points: document.getElementById('scratchMatch4Points').value,
+                scratchMatch5Points: document.getElementById('scratchMatch5Points').value,
+                scratchMatch6Points: document.getElementById('scratchMatch6Points').value,
+                scratchMatch3Exp: document.getElementById('scratchMatch3Exp').value,
+                scratchMatch4Exp: document.getElementById('scratchMatch4Exp').value,
+                scratchMatch5Exp: document.getElementById('scratchMatch5Exp').value,
+                scratchMatch6Exp: document.getElementById('scratchMatch6Exp').value,
                 attendanceStartHour: document.getElementById('attendanceStartHour').value,
                 saveFrequency: document.getElementById('saveFrequency').value,
                 day7Bonus: document.getElementById('day7Bonus').value,
