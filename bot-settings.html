@@ -448,7 +448,49 @@
                             <div class="setting-label">레벨업 보상</div>
                             <div class="setting-desc">레벨업 시 지급</div>
                         </div>
-                        <input type="number" id="levelupReward" class="setting-input" min="0" value="500">
+                        <input type="number" id="levelupReward" class="setting-input" min="0" value="50">
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <div class="section-header">
+                        <div class="section-title">🎲 럭키박스 설정</div>
+                        <div class="setting-desc" style="margin-top: 8px; color: #94a3b8;">채팅 시 확률적으로 추가 보상 지급</div>
+                    </div>
+                    <div class="setting-item">
+                        <div>
+                            <div class="setting-label">당첨 확률 (%)</div>
+                            <div class="setting-desc">0.5% = 200번에 1번, 2% = 50번에 1번</div>
+                        </div>
+                        <input type="number" id="luckyBoxChance" class="setting-input" min="0" max="100" step="0.1" value="2">
+                    </div>
+                    <div class="setting-item">
+                        <div>
+                            <div class="setting-label">최소 포인트</div>
+                            <div class="setting-desc">당첨 시 최소 지급액</div>
+                        </div>
+                        <input type="number" id="luckyBoxMinPoints" class="setting-input" min="0" value="50">
+                    </div>
+                    <div class="setting-item">
+                        <div>
+                            <div class="setting-label">최대 포인트</div>
+                            <div class="setting-desc">당첨 시 최대 지급액</div>
+                        </div>
+                        <input type="number" id="luckyBoxMaxPoints" class="setting-input" min="0" value="200">
+                    </div>
+                    <div class="setting-item">
+                        <div>
+                            <div class="setting-label">최소 경험치</div>
+                            <div class="setting-desc">당첨 시 최소 지급</div>
+                        </div>
+                        <input type="number" id="luckyBoxMinExp" class="setting-input" min="0" value="10">
+                    </div>
+                    <div class="setting-item">
+                        <div>
+                            <div class="setting-label">최대 경험치</div>
+                            <div class="setting-desc">당첨 시 최대 지급</div>
+                        </div>
+                        <input type="number" id="luckyBoxMaxExp" class="setting-input" min="0" value="50">
                     </div>
                 </div>
                 
@@ -1226,46 +1268,7 @@
                 superAdmins: JSON.stringify(settings.superAdmins),
                 admins: JSON.stringify(settings.admins),
                 blockedUsers: JSON.stringify(settings.blockedUsers),
-                blockedRooms: JSON.stringify(settings.blockedRooms),
-                // 기능활성화 초기값 추가
-                features: JSON.stringify({
-                    ATTENDANCE_ENABLED: document.getElementById('ATTENDANCE_ENABLED')?.checked ?? true,
-                    POINT_SYSTEM_ENABLED: document.getElementById('POINT_SYSTEM_ENABLED')?.checked ?? true,
-                    LEVEL_SYSTEM_ENABLED: document.getElementById('LEVEL_SYSTEM_ENABLED')?.checked ?? true,
-                    TITLE_SYSTEM_ENABLED: document.getElementById('TITLE_SYSTEM_ENABLED')?.checked ?? true,
-                    TITLE_AUTO_ENABLED: document.getElementById('TITLE_AUTO_ENABLED')?.checked ?? true,
-                    TITLE_USER_ENABLED: document.getElementById('TITLE_USER_ENABLED')?.checked ?? true,
-                    CHAT_COUNT_ENABLED: document.getElementById('CHAT_COUNT_ENABLED')?.checked ?? true,
-                    TRANSFER_ENABLED: document.getElementById('TRANSFER_ENABLED')?.checked ?? true,
-                    GAMBLE_ENABLED: document.getElementById('GAMBLE_ENABLED')?.checked ?? true,
-                    GAME_BASEBALL_ENABLED: document.getElementById('GAME_BASEBALL_ENABLED')?.checked ?? true,
-                    GAME_LOTTO_ENABLED: document.getElementById('GAME_LOTTO_ENABLED')?.checked ?? true,
-                    GAME_WORDCHAIN_ENABLED: document.getElementById('GAME_WORDCHAIN_ENABLED')?.checked ?? true,
-                    GAME_CHOSUNG_ENABLED: document.getElementById('GAME_CHOSUNG_ENABLED')?.checked ?? true,
-                    GAME_TYPING_ENABLED: document.getElementById('GAME_TYPING_ENABLED')?.checked ?? true,
-                    GAME_SUTDA_ENABLED: document.getElementById('GAME_SUTDA_ENABLED')?.checked ?? true,
-                    GAME_BALANCE_ENABLED: document.getElementById('GAME_BALANCE_ENABLED')?.checked ?? true,
-                    SHOP_ENABLED: document.getElementById('SHOP_ENABLED')?.checked ?? true,
-                    SHOP_BUY_ENABLED: document.getElementById('SHOP_BUY_ENABLED')?.checked ?? true,
-                    SHOP_USE_ENABLED: document.getElementById('SHOP_USE_ENABLED')?.checked ?? true,
-                    MENU_ENABLED: document.getElementById('MENU_ENABLED')?.checked ?? true,
-                    MENU_RANDOM_ENABLED: document.getElementById('MENU_RANDOM_ENABLED')?.checked ?? true,
-                    TEACH_ENABLED: document.getElementById('TEACH_ENABLED')?.checked ?? true,
-                    RANK_ENABLED: document.getElementById('RANK_ENABLED')?.checked ?? true,
-                    RANK_POINT_ENABLED: document.getElementById('RANK_POINT_ENABLED')?.checked ?? true,
-                    RANK_CHAT_ENABLED: document.getElementById('RANK_CHAT_ENABLED')?.checked ?? true,
-                    RANK_LEVEL_ENABLED: document.getElementById('RANK_LEVEL_ENABLED')?.checked ?? true,
-                    RANK_GAME_ENABLED: document.getElementById('RANK_GAME_ENABLED')?.checked ?? true,
-                    INFO_ENABLED: document.getElementById('INFO_ENABLED')?.checked ?? true,
-                    MENTION_ENABLED: document.getElementById('MENTION_ENABLED')?.checked ?? true,
-                    MENTION_NOTIFICATION: document.getElementById('MENTION_NOTIFICATION')?.checked ?? true,
-                    PROFILE_DETECTION_ENABLED: document.getElementById('PROFILE_DETECTION_ENABLED')?.checked ?? true,
-                    PROFILE_NICKNAME_DETECTION: document.getElementById('PROFILE_NICKNAME_DETECTION')?.checked ?? true,
-                    PROFILE_CHANGE_NOTIFICATION: document.getElementById('PROFILE_CHANGE_NOTIFICATION')?.checked ?? true,
-                    INACTIVE_USER_TRACKING: document.getElementById('INACTIVE_USER_TRACKING')?.checked ?? true,
-                    ADMIN_CONTROLS_ENABLED: document.getElementById('ADMIN_CONTROLS_ENABLED')?.checked ?? true,
-                    FORTUNE_ENABLED: document.getElementById('FORTUNE_ENABLED')?.checked ?? true
-                })
+                blockedRooms: JSON.stringify(settings.blockedRooms)
             };
         }
         
@@ -1501,6 +1504,13 @@
                     "ATTENDANCE_REWARD": parseInt(document.getElementById('attendanceReward').value) || 100,
                     "LEVELUP_REWARD": parseInt(document.getElementById('levelupReward').value) || 50,
                     "RANDOM_POINT_BOX_CHANCE": 0.005
+                },
+                "럭키박스설정": {
+                    "LUCKY_BOX_CHANCE": parseFloat(document.getElementById('luckyBoxChance').value) / 100 || 0.02,
+                    "LUCKY_BOX_MIN_POINTS": parseInt(document.getElementById('luckyBoxMinPoints').value) || 50,
+                    "LUCKY_BOX_MAX_POINTS": parseInt(document.getElementById('luckyBoxMaxPoints').value) || 200,
+                    "LUCKY_BOX_MIN_EXP": parseInt(document.getElementById('luckyBoxMinExp').value) || 10,
+                    "LUCKY_BOX_MAX_EXP": parseInt(document.getElementById('luckyBoxMaxExp').value) || 50
                 },
                 "게임보상": {
                     "BASEBALL_REWARD": parseInt(document.getElementById('baseballReward').value) || 50,
@@ -1840,24 +1850,6 @@
                 const removed = initial.filter(x => !settings.blockedRooms.includes(x));
                 if (added.length > 0) batchCommand.방차단추가 = added;
                 if (removed.length > 0) batchCommand.방차단해제 = removed;
-            }
-            
-            // 기능활성화 변경 감지
-            const currentFeatures = JSON.stringify(botConfig.기능활성화);
-            if (currentFeatures !== initialValues.features) {
-                const initial = JSON.parse(initialValues.features);
-                const current = botConfig.기능활성화;
-                const featureChanges = {};
-                
-                for (const key in current) {
-                    if (current[key] !== initial[key]) {
-                        featureChanges[key] = current[key];
-                    }
-                }
-                
-                if (Object.keys(featureChanges).length > 0) {
-                    batchCommand.기능활성화 = featureChanges;
-                }
             }
             
             // 명령어 생성
