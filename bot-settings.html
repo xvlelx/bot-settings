@@ -994,6 +994,53 @@
                         </div>
                     </div>
                 </div>
+                
+                <!-- 생일/운세 시스템 -->
+                <div class="section">
+                    <div class="section-header">
+                        <div class="section-title">🎂 생일/운세 시스템</div>
+                        <div class="section-desc">생일 및 운세 기능 설정</div>
+                    </div>
+                    <div class="settings-group">
+                        <div class="setting-item">
+                            <div class="setting-label">운세 기능</div>
+                            <label class="switch">
+                                <input type="checkbox" id="FORTUNE_ENABLED" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <div class="setting-label">생일 자동 축하</div>
+                            <label class="switch">
+                                <input type="checkbox" id="BIRTHDAY_AUTO_MESSAGE" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <div class="setting-label">생일 보너스 지급</div>
+                            <label class="switch">
+                                <input type="checkbox" id="BIRTHDAY_BONUS_ENABLED" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="settings-group">
+                        <div class="setting-item">
+                            <div>
+                                <div class="setting-label">생일 보너스 포인트</div>
+                                <div class="setting-desc">생일날 지급되는 포인트</div>
+                            </div>
+                            <input type="number" id="birthdayBonusPoints" class="setting-input" min="0" value="2000">
+                        </div>
+                        <div class="setting-item">
+                            <div>
+                                <div class="setting-label">생일 칭호</div>
+                                <div class="setting-desc">생일날 부여되는 칭호 (하루만)</div>
+                            </div>
+                            <input type="text" id="birthdayTitle" class="setting-input" value="🎂 생일 주인공">
+                        </div>
+                    </div>
+                </div>
             </div>
             
             <!-- 탭 4: 관리자 관리 -->
@@ -1518,7 +1565,14 @@
                     "PROFILE_CHANGE_NOTIFICATION": document.getElementById('PROFILE_CHANGE_NOTIFICATION')?.checked ?? true,
                     "INACTIVE_USER_TRACKING": document.getElementById('INACTIVE_USER_TRACKING')?.checked ?? true,
                     "ADMIN_CONTROLS_ENABLED": document.getElementById('ADMIN_CONTROLS_ENABLED')?.checked ?? true,
+                    "FORTUNE_ENABLED": document.getElementById('FORTUNE_ENABLED')?.checked ?? true,
                     "RESET_MODE": "기본"
+                },
+                "생일설정": {
+                    "BIRTHDAY_BONUS_POINTS": parseInt(document.getElementById('birthdayBonusPoints').value) || 2000,
+                    "BIRTHDAY_BONUS_ENABLED": document.getElementById('BIRTHDAY_BONUS_ENABLED')?.checked ?? true,
+                    "BIRTHDAY_AUTO_MESSAGE": document.getElementById('BIRTHDAY_AUTO_MESSAGE')?.checked ?? true,
+                    "BIRTHDAY_TITLE": document.getElementById('birthdayTitle').value || "🎂 생일 주인공"
                 }
             };
             
