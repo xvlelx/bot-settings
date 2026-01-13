@@ -1226,7 +1226,46 @@
                 superAdmins: JSON.stringify(settings.superAdmins),
                 admins: JSON.stringify(settings.admins),
                 blockedUsers: JSON.stringify(settings.blockedUsers),
-                blockedRooms: JSON.stringify(settings.blockedRooms)
+                blockedRooms: JSON.stringify(settings.blockedRooms),
+                // 기능활성화 초기값 추가
+                features: JSON.stringify({
+                    ATTENDANCE_ENABLED: document.getElementById('ATTENDANCE_ENABLED')?.checked ?? true,
+                    POINT_SYSTEM_ENABLED: document.getElementById('POINT_SYSTEM_ENABLED')?.checked ?? true,
+                    LEVEL_SYSTEM_ENABLED: document.getElementById('LEVEL_SYSTEM_ENABLED')?.checked ?? true,
+                    TITLE_SYSTEM_ENABLED: document.getElementById('TITLE_SYSTEM_ENABLED')?.checked ?? true,
+                    TITLE_AUTO_ENABLED: document.getElementById('TITLE_AUTO_ENABLED')?.checked ?? true,
+                    TITLE_USER_ENABLED: document.getElementById('TITLE_USER_ENABLED')?.checked ?? true,
+                    CHAT_COUNT_ENABLED: document.getElementById('CHAT_COUNT_ENABLED')?.checked ?? true,
+                    TRANSFER_ENABLED: document.getElementById('TRANSFER_ENABLED')?.checked ?? true,
+                    GAMBLE_ENABLED: document.getElementById('GAMBLE_ENABLED')?.checked ?? true,
+                    GAME_BASEBALL_ENABLED: document.getElementById('GAME_BASEBALL_ENABLED')?.checked ?? true,
+                    GAME_LOTTO_ENABLED: document.getElementById('GAME_LOTTO_ENABLED')?.checked ?? true,
+                    GAME_WORDCHAIN_ENABLED: document.getElementById('GAME_WORDCHAIN_ENABLED')?.checked ?? true,
+                    GAME_CHOSUNG_ENABLED: document.getElementById('GAME_CHOSUNG_ENABLED')?.checked ?? true,
+                    GAME_TYPING_ENABLED: document.getElementById('GAME_TYPING_ENABLED')?.checked ?? true,
+                    GAME_SUTDA_ENABLED: document.getElementById('GAME_SUTDA_ENABLED')?.checked ?? true,
+                    GAME_BALANCE_ENABLED: document.getElementById('GAME_BALANCE_ENABLED')?.checked ?? true,
+                    SHOP_ENABLED: document.getElementById('SHOP_ENABLED')?.checked ?? true,
+                    SHOP_BUY_ENABLED: document.getElementById('SHOP_BUY_ENABLED')?.checked ?? true,
+                    SHOP_USE_ENABLED: document.getElementById('SHOP_USE_ENABLED')?.checked ?? true,
+                    MENU_ENABLED: document.getElementById('MENU_ENABLED')?.checked ?? true,
+                    MENU_RANDOM_ENABLED: document.getElementById('MENU_RANDOM_ENABLED')?.checked ?? true,
+                    TEACH_ENABLED: document.getElementById('TEACH_ENABLED')?.checked ?? true,
+                    RANK_ENABLED: document.getElementById('RANK_ENABLED')?.checked ?? true,
+                    RANK_POINT_ENABLED: document.getElementById('RANK_POINT_ENABLED')?.checked ?? true,
+                    RANK_CHAT_ENABLED: document.getElementById('RANK_CHAT_ENABLED')?.checked ?? true,
+                    RANK_LEVEL_ENABLED: document.getElementById('RANK_LEVEL_ENABLED')?.checked ?? true,
+                    RANK_GAME_ENABLED: document.getElementById('RANK_GAME_ENABLED')?.checked ?? true,
+                    INFO_ENABLED: document.getElementById('INFO_ENABLED')?.checked ?? true,
+                    MENTION_ENABLED: document.getElementById('MENTION_ENABLED')?.checked ?? true,
+                    MENTION_NOTIFICATION: document.getElementById('MENTION_NOTIFICATION')?.checked ?? true,
+                    PROFILE_DETECTION_ENABLED: document.getElementById('PROFILE_DETECTION_ENABLED')?.checked ?? true,
+                    PROFILE_NICKNAME_DETECTION: document.getElementById('PROFILE_NICKNAME_DETECTION')?.checked ?? true,
+                    PROFILE_CHANGE_NOTIFICATION: document.getElementById('PROFILE_CHANGE_NOTIFICATION')?.checked ?? true,
+                    INACTIVE_USER_TRACKING: document.getElementById('INACTIVE_USER_TRACKING')?.checked ?? true,
+                    ADMIN_CONTROLS_ENABLED: document.getElementById('ADMIN_CONTROLS_ENABLED')?.checked ?? true,
+                    FORTUNE_ENABLED: document.getElementById('FORTUNE_ENABLED')?.checked ?? true
+                })
             };
         }
         
@@ -1803,6 +1842,24 @@
                 if (removed.length > 0) batchCommand.방차단해제 = removed;
             }
             
+            // 기능활성화 변경 감지
+            const currentFeatures = JSON.stringify(botConfig.기능활성화);
+            if (currentFeatures !== initialValues.features) {
+                const initial = JSON.parse(initialValues.features);
+                const current = botConfig.기능활성화;
+                const featureChanges = {};
+                
+                for (const key in current) {
+                    if (current[key] !== initial[key]) {
+                        featureChanges[key] = current[key];
+                    }
+                }
+                
+                if (Object.keys(featureChanges).length > 0) {
+                    batchCommand.기능활성화 = featureChanges;
+                }
+            }
+            
             // 명령어 생성
             let commandStr = "";
             if (Object.keys(batchCommand).length === 0) {
@@ -1844,4 +1901,3 @@
     </script>
 </body>
 </html>
- 
