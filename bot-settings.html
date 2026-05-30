@@ -1,1895 +1,320 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🤖 봇 관리 패널</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: #f5f5f5;
-            padding-bottom: 100px;
-        }
-        
-        .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        
-        .header h1 {
-            font-size: 22px;
-            font-weight: 700;
-            margin-bottom: 5px;
-        }
-        
-        .header p {
-            font-size: 13px;
-            opacity: 0.9;
-        }
-        
-        .tabs {
-            background: white;
-            display: flex;
-            overflow-x: auto;
-            border-bottom: 2px solid #e0e0e0;
-            position: sticky;
-            top: 0;
-            z-index: 99;
-        }
-        
-        .tab {
-            padding: 15px 20px;
-            cursor: pointer;
-            border-bottom: 3px solid transparent;
-            white-space: nowrap;
-            transition: all 0.3s;
-            font-size: 14px;
-            font-weight: 500;
-        }
-        
-        .tab:hover {
-            background: #f5f5f5;
-        }
-        
-        .tab.active {
-            border-bottom-color: #667eea;
-            color: #667eea;
-        }
-        
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-        }
-        
-        .tab-content {
-            display: none;
-        }
-        
-        .tab-content.active {
-            display: block;
-        }
-        
-        .section {
-            background: white;
-            margin: 12px;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-        }
-        
-        .section-header {
-            padding: 16px 20px;
-            background: #fafafa;
-            border-bottom: 1px solid #e0e0e0;
-        }
-        
-        .section-title {
-            font-size: 16px;
-            font-weight: 600;
-            color: #333;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .setting-item {
-            padding: 16px 20px;
-            border-bottom: 1px solid #f0f0f0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .setting-item:last-child {
-            border-bottom: none;
-        }
-        
-        .setting-label {
-            font-size: 15px;
-            color: #333;
-            flex: 1;
-        }
-        
-        .setting-desc {
-            font-size: 13px;
-            color: #999;
-            margin-top: 4px;
-        }
-        
-        .setting-input {
-            width: 120px;
-            padding: 8px 12px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 15px;
-            text-align: right;
-        }
-        
-        .setting-input-wide {
-            width: 200px;
-        }
-        
-        .toggle {
-            position: relative;
-            width: 51px;
-            height: 31px;
-            background: #ccc;
-            border-radius: 31px;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-        
-        .toggle.active {
-            background: #667eea;
-        }
-        
-        .toggle-knob {
-            position: absolute;
-            top: 2px;
-            left: 2px;
-            width: 27px;
-            height: 27px;
-            background: white;
-            border-radius: 50%;
-            transition: left 0.3s;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        }
-        
-        .toggle.active .toggle-knob {
-            left: 22px;
-        }
-        
-        .list-container {
-            padding: 20px;
-        }
-        
-        .list-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px;
-            background: #f9f9f9;
-            border-radius: 8px;
-            margin-bottom: 8px;
-        }
-        
-        .list-item span {
-            font-size: 14px;
-            color: #333;
-        }
-        
-        .btn-remove {
-            padding: 6px 12px;
-            background: #ff4757;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 13px;
-            cursor: pointer;
-        }
-        
-        .btn-add {
-            width: 100%;
-            padding: 12px;
-            background: #667eea;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            margin-top: 12px;
-        }
-        
-        .input-group {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 12px;
-        }
-        
-        .input-group input {
-            flex: 1;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 14px;
-        }
-        
-        .save-button {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: calc(100% - 40px);
-            max-width: 860px;
-            padding: 16px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            font-size: 16px;
-            font-weight: 600;
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        }
-        
-        .save-button:active {
-            transform: translateX(-50%) scale(0.98);
-        }
-        
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .modal.show {
-            display: flex;
-        }
-        
-        .modal-content {
-            background: white;
-            padding: 24px;
-            border-radius: 12px;
-            max-width: 500px;
-            width: calc(100% - 40px);
-            max-height: 80vh;
-            overflow-y: auto;
-        }
-        
-        .modal-title {
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 12px;
-        }
-        
-        .modal-code {
-            background: #f5f5f5;
-            padding: 16px;
-            border-radius: 8px;
-            font-family: 'Courier New', monospace;
-            font-size: 12px;
-            max-height: 300px;
-            overflow-y: auto;
-            margin: 16px 0;
-            white-space: pre-wrap;
-            word-break: break-all;
-        }
-        
-        .modal-buttons {
-            display: flex;
-            gap: 8px;
-        }
-        
-        .modal-button {
-            flex: 1;
-            padding: 12px;
-            border: none;
-            border-radius: 8px;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-        
-        .modal-button.primary {
-            background: #667eea;
-            color: white;
-        }
-        
-        .modal-button.secondary {
-            background: #f0f0f0;
-            color: #666;
-        }
-        
-        .password-modal {
-            display: flex;
-        }
-        
-        .password-input {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 15px;
-            margin: 16px 0;
-        }
-        
-        .empty-state {
-            text-align: center;
-            padding: 40px 20px;
-            color: #999;
-        }
-    </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>봇 설정</title>
+<style>
+  :root{--bg:#0f1115;--card:#1a1d24;--line:#2a2f3a;--txt:#e6e8ee;--muted:#8a92a3;--accent:#4c8bf5;--ok:#2ecc71;--err:#e74c3c;--gold:#f5c451;}
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans KR",sans-serif;padding:14px;padding-bottom:90px;}
+  h1{font-size:18px;margin:0 0 12px;}
+  h2{font-size:14px;margin:16px 0 8px;color:var(--accent);border-bottom:1px solid var(--line);padding-bottom:6px;}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:14px;}
+  .conn .row{flex-direction:column;align-items:stretch;}
+  .conn input{width:100%;margin-top:4px;}
+  .row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.03);}
+  .row label{font-size:13px;flex:1;}
+  .row label .key{font-size:11px;color:var(--muted);display:block;margin-top:1px;}
+  input[type=number],input[type=text],input[type=password]{background:#11141a;border:1px solid var(--line);color:var(--txt);border-radius:8px;padding:8px 10px;width:150px;font-size:13px;}
+  input.wide{width:100%;}
+  input[type=checkbox]{width:20px;height:20px;}
+  button{background:var(--accent);color:#fff;border:0;border-radius:8px;padding:11px 16px;font-size:14px;font-weight:600;cursor:pointer;}
+  button.sec{background:#2a2f3a;}
+  /* 탭 */
+  .tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;margin-bottom:6px;-webkit-overflow-scrolling:touch;}
+  .tabs button{background:#161922;border:1px solid var(--line);color:var(--muted);padding:9px 12px;border-radius:10px;font-size:13px;white-space:nowrap;font-weight:600;}
+  .tabs button.on{background:var(--accent);color:#fff;border-color:var(--accent);}
+  .panel{display:none;}
+  .panel.on{display:block;}
+  /* 권한/차단 리스트 */
+  .uitem{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05);}
+  .uname{font-size:14px;}
+  .badge{font-size:11px;padding:2px 7px;border-radius:20px;margin-left:6px;}
+  .b-super{background:rgba(245,196,81,.18);color:var(--gold);}
+  .b-admin{background:rgba(76,139,245,.18);color:var(--accent);}
+  .b-ban{background:rgba(231,76,60,.18);color:var(--err);}
+  .roles{display:flex;gap:5px;}
+  .roles button{padding:6px 9px;font-size:12px;background:#2a2f3a;}
+  .roles button.on{background:var(--accent);}
+  .roles button.on.super{background:var(--gold);color:#222;}
+  .filter{width:100%;margin-bottom:8px;}
+  .bar{position:fixed;left:0;right:0;bottom:0;background:#0c0e12;border-top:1px solid var(--line);padding:12px 14px;display:flex;gap:10px;}
+  .bar button{flex:1;}
+  #status{font-size:13px;padding:8px 0;min-height:20px;}
+  .muted{color:var(--muted);font-size:12px;}
+  .gate{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:100;padding:24px;}
+  .gatebox{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:24px;width:100%;max-width:320px;text-align:center;}
+  .gatebox h2{border:0;margin:0 0 14px;color:var(--txt);}
+  .gatebox input{width:100%;}
+  .hidden{display:none !important;}
+</style>
 </head>
 <body>
-    <!-- 암호 확인 모달 -->
-    <div class="modal password-modal" id="passwordModal">
-        <div class="modal-content">
-            <div class="modal-title">🔐 방장 인증</div>
-            <p style="color: #666; margin: 12px 0;">방장 암호를 입력하세요</p>
-            <input type="password" id="passwordInput" class="password-input" placeholder="암호 입력">
-            <div class="modal-buttons">
-                <button class="modal-button primary" onclick="checkPassword()">확인</button>
-            </div>
-        </div>
-    </div>
-    
-    <!-- 메인 컨텐츠 -->
-    <div id="mainContent" style="display: none;">
-        <div class="header">
-            <h1>🤖 봇 관리 패널</h1>
-            <p>모든 설정을 한 곳에서 관리하세요</p>
-        </div>
-        
-        <div class="tabs">
-            <div class="tab active" onclick="switchTab(0)">⚙️ 기본설정</div>
-            <div class="tab" onclick="switchTab(1)">💰 포인트</div>
-            <div class="tab" onclick="switchTab(2)">🎮 게임</div>
-            <div class="tab" onclick="switchTab(3)">🔧 기능활성화</div>
-            <div class="tab" onclick="switchTab(4)">👥 방장</div>
-            <div class="tab" onclick="switchTab(5)">🚫 차단</div>
-        </div>
-        
-        <div class="container">
-            <!-- 탭 1: 기본 설정 -->
-            <div class="tab-content active" id="tab0">
-                <div class="section">
-                    <div class="section-header">
-                        <div class="section-title">🔧 시스템 설정</div>
-                    </div>
-                    <div class="setting-item">
-                        <div>
-                            <div class="setting-label">출석 시작 시간</div>
-                            <div class="setting-desc">출석 가능 시작 시각 (시)</div>
-                        </div>
-                        <input type="number" id="attendanceStartHour" class="setting-input" min="0" max="23" value="6">
-                    </div>
-                    <div class="setting-item">
-                        <div>
-                            <div class="setting-label">데이터 저장 빈도</div>
-                            <div class="setting-desc">N번 메시지마다 저장</div>
-                        </div>
-                        <input type="number" id="saveFrequency" class="setting-input" min="1" value="20">
-                    </div>
-                    <div class="setting-item">
-                        <div>
-                            <div class="setting-label">입장 환영 메시지</div>
-                            <div class="setting-desc">방 입장 시 환영 메시지</div>
-                        </div>
-                        <div class="toggle active" id="joinMessageToggle" onclick="toggleSwitch('joinMessage')">
-                            <div class="toggle-knob"></div>
-                        </div>
-                    </div>
-                    <div class="setting-item">
-                        <div>
-                            <div class="setting-label">퇴장 메시지</div>
-                            <div class="setting-desc">방 퇴장 시 메시지</div>
-                        </div>
-                        <div class="toggle" id="leaveMessageToggle" onclick="toggleSwitch('leaveMessage')">
-                            <div class="toggle-knob"></div>
-                        </div>
-                    </div>
-                    <div class="setting-item">
-                        <div>
-                            <div class="setting-label">닉네임 변경 알림</div>
-                            <div class="setting-desc">닉네임 변경 감지 알림</div>
-                        </div>
-                        <div class="toggle active" id="nicknameAlertToggle" onclick="toggleSwitch('nicknameAlert')">
-                            <div class="toggle-knob"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- 탭 2: 포인트 설정 -->
-            <div class="tab-content" id="tab1">
-                <div class="section">
-                    <div class="section-header">
-                        <div class="section-title">💰 기본 보상</div>
-                    </div>
-                    <div class="setting-item">
-                        <div>
-                            <div class="setting-label">채팅 포인트</div>
-                            <div class="setting-desc">메시지당 지급</div>
-                        </div>
-                        <input type="number" id="chatPoint" class="setting-input" min="0" value="1">
-                    </div>
-                    <div class="setting-item">
-                        <div>
-                            <div class="setting-label">채팅 경험치</div>
-                            <div class="setting-desc">메시지당 지급</div>
-                        </div>
-                        <input type="number" id="chatExp" class="setting-input" min="0" value="1">
-                    </div>
-                    <div class="setting-item">
-                        <div>
-                            <div class="setting-label">출석 포인트</div>
-                            <div class="setting-desc">출석 체크 시 지급</div>
-                        </div>
-                        <input type="number" id="attendanceReward" class="setting-input" min="0" value="100">
-                    </div>
-                    <div class="setting-item">
-                        <div>
-                            <div class="setting-label">레벨업 보상</div>
-                            <div class="setting-desc">레벨업 시 지급</div>
-                        </div>
-                        <input type="number" id="levelupReward" class="setting-input" min="0" value="50">
-                    </div>
-                </div>
-                
-                <div class="section">
-                    <div class="section-header">
-                        <div class="section-title">🎲 럭키박스 설정</div>
-                        <div class="setting-desc" style="margin-top: 8px; color: #94a3b8;">채팅 시 확률적으로 추가 보상 지급</div>
-                    </div>
-                    <div class="setting-item">
-                        <div>
-                            <div class="setting-label">당첨 확률 (%)</div>
-                            <div class="setting-desc">0.5% = 200번에 1번, 2% = 50번에 1번</div>
-                        </div>
-                        <input type="number" id="luckyBoxChance" class="setting-input" min="0" max="100" step="0.1" value="2">
-                    </div>
-                    <div class="setting-item">
-                        <div>
-                            <div class="setting-label">최소 포인트</div>
-                            <div class="setting-desc">당첨 시 최소 지급액</div>
-                        </div>
-                        <input type="number" id="luckyBoxMinPoints" class="setting-input" min="0" value="50">
-                    </div>
-                    <div class="setting-item">
-                        <div>
-                            <div class="setting-label">최대 포인트</div>
-                            <div class="setting-desc">당첨 시 최대 지급액</div>
-                        </div>
-                        <input type="number" id="luckyBoxMaxPoints" class="setting-input" min="0" value="200">
-                    </div>
-                    <div class="setting-item">
-                        <div>
-                            <div class="setting-label">최소 경험치</div>
-                            <div class="setting-desc">당첨 시 최소 지급</div>
-                        </div>
-                        <input type="number" id="luckyBoxMinExp" class="setting-input" min="0" value="10">
-                    </div>
-                    <div class="setting-item">
-                        <div>
-                            <div class="setting-label">최대 경험치</div>
-                            <div class="setting-desc">당첨 시 최대 지급</div>
-                        </div>
-                        <input type="number" id="luckyBoxMaxExp" class="setting-input" min="0" value="50">
-                    </div>
-                </div>
-                
-                <div class="section">
-                    <div class="section-header">
-                        <div class="section-title">🎁 출석 보너스</div>
-                    </div>
-                    <div class="setting-item">
-                        <div>
-                            <div class="setting-label">7일 연속</div>
-                        </div>
-                        <input type="number" id="day7Bonus" class="setting-input" min="0" value="50">
-                    </div>
-                    <div class="setting-item">
-                        <div>
-                            <div class="setting-label">14일 연속</div>
-                        </div>
-                        <input type="number" id="day14Bonus" class="setting-input" min="0" value="50">
-                    </div>
-                    <div class="setting-item">
-                        <div>
-                            <div class="setting-label">21일 연속</div>
-                        </div>
-                        <input type="number" id="day21Bonus" class="setting-input" min="0" value="50">
-                    </div>
-                    <div class="setting-item">
-                        <div>
-                            <div class="setting-label">28일 연속</div>
-                        </div>
-                        <input type="number" id="day28Bonus" class="setting-input" min="0" value="50">
-                    </div>
-                </div>
-            </div>
-            
-            <!-- 탭 3: 게임 설정 -->
-            <div class="tab-content" id="tab2">
-                <div class="section">
-                    <div class="section-header">
-                        <div class="section-title">🎮 게임 보상 (포인트)</div>
-                    </div>
-                    <div class="setting-item">
-                        <div>
-                            <div class="setting-label">야구게임</div>
-                        </div>
-                        <input type="number" id="baseballReward" class="setting-input" min="0" value="50">
-                    </div>
-                    <div class="setting-item">
-                        <div>
-                            <div class="setting-label">끝말잇기</div>
-                        </div>
-                        <input type="number" id="wordReward" class="setting-input" min="0" value="20">
-                    </div>
-                    <div class="setting-item">
-                        <div>
-                            <div class="setting-label">타자게임</div>
-                        </div>
-                        <input type="number" id="typingReward" class="setting-input" min="0" value="30">
-                    </div>
-                    <div class="setting-item">
-                        <div>
-                            <div class="setting-label">초성게임</div>
-                        </div>
-                        <input type="number" id="chosungReward" class="setting-input" min="0" value="15">
-                    </div>
-                    <div class="setting-item">
-                        <div>
-                            <div class="setting-label">밸런스게임</div>
-                        </div>
-                        <input type="number" id="balanceReward" class="setting-input" min="0" value="100">
-                    </div>
-                </div>
-                
-                <div class="section">
-                    <div class="section-header">
-                        <div class="section-title">⭐ 게임 보상 (경험치)</div>
-                    </div>
-                    <div class="setting-item">
-                        <div>
-                            <div class="setting-label">야구게임</div>
-                        </div>
-                        <input type="number" id="baseballExp" class="setting-input" min="0" value="30">
-                    </div>
-                    <div class="setting-item">
-                        <div>
-                            <div class="setting-label">끝말잇기</div>
-                        </div>
-                        <input type="number" id="wordExp" class="setting-input" min="0" value="30">
-                    </div>
-                    <div class="setting-item">
-                        <div>
-                            <div class="setting-label">타자게임</div>
-                        </div>
-                        <input type="number" id="typingExp" class="setting-input" min="0" value="30">
-                    </div>
-                    <div class="setting-item">
-                        <div>
-                            <div class="setting-label">초성게임</div>
-                        </div>
-                        <input type="number" id="chosungExp" class="setting-input" min="0" value="20">
-                    </div>
-                    <div class="setting-item">
-                        <div>
-                            <div class="setting-label">밸런스게임</div>
-                        </div>
-                        <input type="number" id="balanceExp" class="setting-input" min="0" value="10">
-                    </div>
-                    <div class="setting-item">
-                        <div>
-                            <div class="setting-label">로또</div>
-                        </div>
-                        <input type="number" id="lottoExp" class="setting-input" min="0" value="50">
-                    </div>
-                </div>
-                
-                <div class="section">
-                    <div class="section-header">
-                        <div class="section-title">⚙️ 게임 설정</div>
-                    </div>
-                    <div class="setting-item">
-                        <div>
-                            <div class="setting-label">도박 최소 금액</div>
-                        </div>
-                        <input type="number" id="gambleMin" class="setting-input" min="0" value="1000">
-                    </div>
-                    <div class="setting-item">
-                        <div>
-                            <div class="setting-label">도박 최대 변동률 (%)</div>
-                        </div>
-                        <input type="number" id="gambleMaxPercent" class="setting-input" min="0" value="100">
-                    </div>
-                    <div class="setting-item">
-                        <div>
-                            <div class="setting-label">로또 티켓 가격</div>
-                        </div>
-                        <input type="number" id="lottoPrice" class="setting-input" min="0" value="100">
-                    </div>
-                    <div class="setting-item">
-                        <div>
-                            <div class="setting-label">로또 1등 상금</div>
-                        </div>
-                        <input type="number" id="lottoFirstPrize" class="setting-input" min="0" value="1000">
-                    </div>
-                    <div class="setting-item">
-                        <div>
-                            <div class="setting-label">로또 2등 상금</div>
-                        </div>
-                        <input type="number" id="lottoSecondPrize" class="setting-input" min="0" value="500">
-                    </div>
-                    <div class="setting-item">
-                        <div>
-                            <div class="setting-label">섯다 참가비</div>
-                        </div>
-                        <input type="number" id="sutdaEntryFee" class="setting-input" min="0" value="100">
-                    </div>
-                    <div class="setting-item">
-                        <div>
-                            <div class="setting-label">섯다 보너스</div>
-                        </div>
-                        <input type="number" id="sutdaBonus" class="setting-input" min="0" value="50">
-                    </div>
-                </div>
-                
-                <!-- 복권 설정 -->
-                <div class="section">
-                    <div class="section-header">
-                        <div class="section-title">🎰 긁는 복권</div>
-                        <div class="section-desc">스크래치 복권 보상 및 제한 설정</div>
-                    </div>
-                    <div class="settings-group">
-                        <div class="setting-item">
-                            <div>
-                                <div class="setting-label">하루 무료 티켓</div>
-                                <div class="setting-desc">매일 무료로 받을 수 있는 복권 개수</div>
-                            </div>
-                            <input type="number" id="dailyFreeTickets" class="setting-input" min="1" max="10" value="3">
-                        </div>
-                    </div>
-                    
-                    <div class="settings-group">
-                        <div class="setting-group-title">💰 포인트 보상</div>
-                        <div class="setting-item">
-                            <div>
-                                <div class="setting-label">3개 일치</div>
-                            </div>
-                            <input type="number" id="scratch3MatchPoints" class="setting-input" min="0" value="200">
-                        </div>
-                        <div class="setting-item">
-                            <div>
-                                <div class="setting-label">4개 일치</div>
-                            </div>
-                            <input type="number" id="scratch4MatchPoints" class="setting-input" min="0" value="500">
-                        </div>
-                        <div class="setting-item">
-                            <div>
-                                <div class="setting-label">5개 일치</div>
-                            </div>
-                            <input type="number" id="scratch5MatchPoints" class="setting-input" min="0" value="2000">
-                        </div>
-                        <div class="setting-item">
-                            <div>
-                                <div class="setting-label">6개 일치 (대박!)</div>
-                            </div>
-                            <input type="number" id="scratch6MatchPoints" class="setting-input" min="0" value="5000">
-                        </div>
-                    </div>
-                    
-                    <div class="settings-group">
-                        <div class="setting-group-title">⭐ 경험치 보상</div>
-                        <div class="setting-item">
-                            <div>
-                                <div class="setting-label">3개 일치</div>
-                            </div>
-                            <input type="number" id="scratch3MatchExp" class="setting-input" min="0" value="30">
-                        </div>
-                        <div class="setting-item">
-                            <div>
-                                <div class="setting-label">4개 일치</div>
-                            </div>
-                            <input type="number" id="scratch4MatchExp" class="setting-input" min="0" value="50">
-                        </div>
-                        <div class="setting-item">
-                            <div>
-                                <div class="setting-label">5개 일치</div>
-                            </div>
-                            <input type="number" id="scratch5MatchExp" class="setting-input" min="0" value="100">
-                        </div>
-                        <div class="setting-item">
-                            <div>
-                                <div class="setting-label">6개 일치 (대박!)</div>
-                            </div>
-                            <input type="number" id="scratch6MatchExp" class="setting-input" min="0" value="200">
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- 탭 3: 기능활성화 -->
-            <div class="tab-content" id="tab3">
-                <div class="section">
-                    <div class="section-header">
-                        <div class="section-title">🎯 핵심 시스템</div>
-                        <div class="section-desc">봇의 핵심 기능을 개별적으로 켜고 끌 수 있습니다</div>
-                    </div>
-                    <div class="settings-group">
-                        <div class="setting-item">
-                            <div class="setting-label">출석 시스템</div>
-                            <label class="switch">
-                                <input type="checkbox" id="ATTENDANCE_ENABLED" checked>
-                                <span class="slider"></span>
-                            </label>
-                        </div>
-                        <div class="setting-item">
-                            <div class="setting-label">포인트 시스템</div>
-                            <label class="switch">
-                                <input type="checkbox" id="POINT_SYSTEM_ENABLED" checked>
-                                <span class="slider"></span>
-                            </label>
-                        </div>
-                        <div class="setting-item">
-                            <div class="setting-label">레벨 시스템</div>
-                            <label class="switch">
-                                <input type="checkbox" id="LEVEL_SYSTEM_ENABLED" checked>
-                                <span class="slider"></span>
-                            </label>
-                        </div>
-                        <div class="setting-item">
-                            <div class="setting-label">칭호 시스템</div>
-                            <label class="switch">
-                                <input type="checkbox" id="TITLE_SYSTEM_ENABLED" checked>
-                                <span class="slider"></span>
-                            </label>
-                        </div>
-                        <div class="setting-item">
-                            <div class="setting-label">자동 칭호 부여</div>
-                            <label class="switch">
-                                <input type="checkbox" id="TITLE_AUTO_ENABLED" checked>
-                                <span class="slider"></span>
-                            </label>
-                        </div>
-                        <div class="setting-item">
-                            <div class="setting-label">유저 칭호 사용</div>
-                            <label class="switch">
-                                <input type="checkbox" id="TITLE_USER_ENABLED" checked>
-                                <span class="slider"></span>
-                            </label>
-                        </div>
-                        <div class="setting-item">
-                            <div class="setting-label">채팅 카운트</div>
-                            <label class="switch">
-                                <input type="checkbox" id="CHAT_COUNT_ENABLED" checked>
-                                <span class="slider"></span>
-                            </label>
-                        </div>
-                    </div>
-                </div>
+<div id="gate" class="gate">
+  <div class="gatebox">
+    <h2>🔒 비밀번호</h2>
+    <input id="pw" type="password" placeholder="비밀번호" onkeydown="if(event.key==='Enter')unlock()">
+    <button onclick="unlock()" style="width:100%;margin-top:10px">입장</button>
+    <div id="pwErr" class="muted" style="color:var(--err);margin-top:8px;min-height:16px"></div>
+  </div>
+</div>
 
-                <div class="section">
-                    <div class="section-header">
-                        <div class="section-title">💸 경제 시스템</div>
-                        <div class="section-desc">포인트 관련 기능</div>
-                    </div>
-                    <div class="settings-group">
-                        <div class="setting-item">
-                            <div class="setting-label">이체 기능</div>
-                            <label class="switch">
-                                <input type="checkbox" id="TRANSFER_ENABLED" checked>
-                                <span class="slider"></span>
-                            </label>
-                        </div>
-                        <div class="setting-item">
-                            <div class="setting-label">도박 기능</div>
-                            <label class="switch">
-                                <input type="checkbox" id="GAMBLE_ENABLED" checked>
-                                <span class="slider"></span>
-                            </label>
-                        </div>
-                    </div>
-                </div>
+<h1>⚙️ 봇 설정</h1>
 
-                <div class="section">
-                    <div class="section-header">
-                        <div class="section-title">🎮 게임 시스템</div>
-                        <div class="section-desc">각 게임을 개별적으로 활성화/비활성화</div>
-                    </div>
-                    <div class="settings-group">
-                        <div class="setting-item">
-                            <div class="setting-label">야구 게임</div>
-                            <label class="switch">
-                                <input type="checkbox" id="GAME_BASEBALL_ENABLED" checked>
-                                <span class="slider"></span>
-                            </label>
-                        </div>
-                        <div class="setting-item">
-                            <div class="setting-label">로또</div>
-                            <label class="switch">
-                                <input type="checkbox" id="GAME_LOTTO_ENABLED" checked>
-                                <span class="slider"></span>
-                            </label>
-                        </div>
-                        <div class="setting-item">
-                            <div class="setting-label">끝말잇기</div>
-                            <label class="switch">
-                                <input type="checkbox" id="GAME_WORDCHAIN_ENABLED" checked>
-                                <span class="slider"></span>
-                            </label>
-                        </div>
-                        <div class="setting-item">
-                            <div class="setting-label">초성 게임</div>
-                            <label class="switch">
-                                <input type="checkbox" id="GAME_CHOSUNG_ENABLED" checked>
-                                <span class="slider"></span>
-                            </label>
-                        </div>
-                        <div class="setting-item">
-                            <div class="setting-label">타자 게임</div>
-                            <label class="switch">
-                                <input type="checkbox" id="GAME_TYPING_ENABLED" checked>
-                                <span class="slider"></span>
-                            </label>
-                        </div>
-                        <div class="setting-item">
-                            <div class="setting-label">섯다</div>
-                            <label class="switch">
-                                <input type="checkbox" id="GAME_SUTDA_ENABLED" checked>
-                                <span class="slider"></span>
-                            </label>
-                        </div>
-                        <div class="setting-item">
-                            <div class="setting-label">밸런스 게임</div>
-                            <label class="switch">
-                                <input type="checkbox" id="GAME_BALANCE_ENABLED" checked>
-                                <span class="slider"></span>
-                            </label>
-                        </div>
-                    </div>
-                </div>
+<div class="card conn">
+  <div class="row"><label>RTDB URL</label><input id="fbUrl" type="text" value="https://kakaobot-1df67-default-rtdb.asia-southeast1.firebasedatabase.app"></div>
+  <div class="row"><label>비밀키/토큰 <span class="muted">(공개 규칙이면 비움)</span></label><input id="fbAuth" type="password" placeholder="비워두세요"></div>
+</div>
 
-                <div class="section">
-                    <div class="section-header">
-                        <div class="section-title">🛒 상점 & 기타</div>
-                        <div class="section-desc">상점, 메뉴, 학습 기능</div>
-                    </div>
-                    <div class="settings-group">
-                        <div class="setting-item">
-                            <div class="setting-label">상점 시스템</div>
-                            <label class="switch">
-                                <input type="checkbox" id="SHOP_ENABLED" checked>
-                                <span class="slider"></span>
-                            </label>
-                        </div>
-                        <div class="setting-item">
-                            <div class="setting-label">상점 구매</div>
-                            <label class="switch">
-                                <input type="checkbox" id="SHOP_BUY_ENABLED" checked>
-                                <span class="slider"></span>
-                            </label>
-                        </div>
-                        <div class="setting-item">
-                            <div class="setting-label">아이템 사용</div>
-                            <label class="switch">
-                                <input type="checkbox" id="SHOP_USE_ENABLED" checked>
-                                <span class="slider"></span>
-                            </label>
-                        </div>
-                        <div class="setting-item">
-                            <div class="setting-label">메뉴 시스템</div>
-                            <label class="switch">
-                                <input type="checkbox" id="MENU_ENABLED" checked>
-                                <span class="slider"></span>
-                            </label>
-                        </div>
-                        <div class="setting-item">
-                            <div class="setting-label">랜덤 메뉴</div>
-                            <label class="switch">
-                                <input type="checkbox" id="MENU_RANDOM_ENABLED" checked>
-                                <span class="slider"></span>
-                            </label>
-                        </div>
-                        <div class="setting-item">
-                            <div class="setting-label">가르치기 기능</div>
-                            <label class="switch">
-                                <input type="checkbox" id="TEACH_ENABLED" checked>
-                                <span class="slider"></span>
-                            </label>
-                        </div>
-                    </div>
-                </div>
+<div class="tabs" id="tabs"></div>
 
-                <div class="section">
-                    <div class="section-header">
-                        <div class="section-title">📊 순위 시스템</div>
-                        <div class="section-desc">각종 순위 표시 기능</div>
-                    </div>
-                    <div class="settings-group">
-                        <div class="setting-item">
-                            <div class="setting-label">순위 시스템</div>
-                            <label class="switch">
-                                <input type="checkbox" id="RANK_ENABLED" checked>
-                                <span class="slider"></span>
-                            </label>
-                        </div>
-                        <div class="setting-item">
-                            <div class="setting-label">포인트 순위</div>
-                            <label class="switch">
-                                <input type="checkbox" id="RANK_POINT_ENABLED" checked>
-                                <span class="slider"></span>
-                            </label>
-                        </div>
-                        <div class="setting-item">
-                            <div class="setting-label">채팅 순위</div>
-                            <label class="switch">
-                                <input type="checkbox" id="RANK_CHAT_ENABLED" checked>
-                                <span class="slider"></span>
-                            </label>
-                        </div>
-                        <div class="setting-item">
-                            <div class="setting-label">레벨 순위</div>
-                            <label class="switch">
-                                <input type="checkbox" id="RANK_LEVEL_ENABLED" checked>
-                                <span class="slider"></span>
-                            </label>
-                        </div>
-                        <div class="setting-item">
-                            <div class="setting-label">게임 승리 순위</div>
-                            <label class="switch">
-                                <input type="checkbox" id="RANK_GAME_ENABLED" checked>
-                                <span class="slider"></span>
-                            </label>
-                        </div>
-                        <div class="setting-item">
-                            <div class="setting-label">정보 조회</div>
-                            <label class="switch">
-                                <input type="checkbox" id="INFO_ENABLED" checked>
-                                <span class="slider"></span>
-                            </label>
-                        </div>
-                    </div>
-                </div>
+<div id="panels"></div>
 
-                <div class="section">
-                    <div class="section-header">
-                        <div class="section-title">🔔 알림 & 감지</div>
-                        <div class="section-desc">멘션, 프로필 변경 감지 등</div>
-                    </div>
-                    <div class="settings-group">
-                        <div class="setting-item">
-                            <div class="setting-label">멘션 시스템</div>
-                            <label class="switch">
-                                <input type="checkbox" id="MENTION_ENABLED" checked>
-                                <span class="slider"></span>
-                            </label>
-                        </div>
-                        <div class="setting-item">
-                            <div class="setting-label">멘션 알림</div>
-                            <label class="switch">
-                                <input type="checkbox" id="MENTION_NOTIFICATION" checked>
-                                <span class="slider"></span>
-                            </label>
-                        </div>
-                        <div class="setting-item">
-                            <div class="setting-label">프로필 감지</div>
-                            <label class="switch">
-                                <input type="checkbox" id="PROFILE_DETECTION_ENABLED" checked>
-                                <span class="slider"></span>
-                            </label>
-                        </div>
-                        <div class="setting-item">
-                            <div class="setting-label">닉네임 변경 감지</div>
-                            <label class="switch">
-                                <input type="checkbox" id="PROFILE_NICKNAME_DETECTION" checked>
-                                <span class="slider"></span>
-                            </label>
-                        </div>
-                        <div class="setting-item">
-                            <div class="setting-label">프로필 변경 알림</div>
-                            <label class="switch">
-                                <input type="checkbox" id="PROFILE_CHANGE_NOTIFICATION" checked>
-                                <span class="slider"></span>
-                            </label>
-                        </div>
-                        <div class="setting-item">
-                            <div class="setting-label">비활성 유저 추적</div>
-                            <label class="switch">
-                                <input type="checkbox" id="INACTIVE_USER_TRACKING" checked>
-                                <span class="slider"></span>
-                            </label>
-                        </div>
-                    </div>
-                </div>
+<div class="bar">
+  <button class="sec" onclick="loadAll()">⬇ 불러오기</button>
+  <button onclick="saveAll()">💾 저장</button>
+</div>
+<div id="status"></div>
 
-                <div class="section">
-                    <div class="section-header">
-                        <div class="section-title">⚙️ 관리 기능</div>
-                        <div class="section-desc">관리자 전용 기능</div>
-                    </div>
-                    <div class="settings-group">
-                        <div class="setting-item">
-                            <div class="setting-label">관리자 컨트롤</div>
-                            <label class="switch">
-                                <input type="checkbox" id="ADMIN_CONTROLS_ENABLED" checked>
-                                <span class="slider"></span>
-                            </label>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- 생일/운세 시스템 -->
-                <div class="section">
-                    <div class="section-header">
-                        <div class="section-title">🎂 생일/운세 시스템</div>
-                        <div class="section-desc">생일 및 운세 기능 설정</div>
-                    </div>
-                    <div class="settings-group">
-                        <div class="setting-item">
-                            <div class="setting-label">운세 기능</div>
-                            <label class="switch">
-                                <input type="checkbox" id="FORTUNE_ENABLED" checked>
-                                <span class="slider"></span>
-                            </label>
-                        </div>
-                        <div class="setting-item">
-                            <div class="setting-label">생일 자동 축하</div>
-                            <label class="switch">
-                                <input type="checkbox" id="BIRTHDAY_AUTO_MESSAGE" checked>
-                                <span class="slider"></span>
-                            </label>
-                        </div>
-                        <div class="setting-item">
-                            <div class="setting-label">생일 보너스 지급</div>
-                            <label class="switch">
-                                <input type="checkbox" id="BIRTHDAY_BONUS_ENABLED" checked>
-                                <span class="slider"></span>
-                            </label>
-                        </div>
-                    </div>
-                    <div class="settings-group">
-                        <div class="setting-item">
-                            <div>
-                                <div class="setting-label">생일 보너스 포인트</div>
-                                <div class="setting-desc">생일날 지급되는 포인트</div>
-                            </div>
-                            <input type="number" id="birthdayBonusPoints" class="setting-input" min="0" value="2000">
-                        </div>
-                        <div class="setting-item">
-                            <div>
-                                <div class="setting-label">생일 칭호</div>
-                                <div class="setting-desc">생일날 부여되는 칭호 (하루만)</div>
-                            </div>
-                            <input type="text" id="birthdayTitle" class="setting-input" value="🎂 생일 주인공">
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- 탭 4: 관리자 관리 -->
-            <div class="tab-content" id="tab4">
-                <div class="section">
-                    <div class="section-header">
-                        <div class="section-title">👑 방장 목록</div>
-                    </div>
-                    <div class="list-container">
-                        <div id="superAdminListView"></div>
-                    </div>
-                </div>
-                
-                <div class="section">
-                    <div class="section-header">
-                        <div class="section-title">👑 방장 추가/제거</div>
-                    </div>
-                    <div class="list-container">
-                        <div class="input-group">
-                            <input type="text" id="superAdminInput" placeholder="닉네임 입력">
-                            <button class="btn-add" onclick="addSuperAdmin()">추가</button>
-                        </div>
-                        <div id="superAdminList"></div>
-                    </div>
-                </div>
-                
-                <div class="section">
-                    <div class="section-header">
-                        <div class="section-title">🛡️ 관리자 목록</div>
-                    </div>
-                    <div class="list-container">
-                        <div id="adminListView"></div>
-                    </div>
-                </div>
-                
-                <div class="section">
-                    <div class="section-header">
-                        <div class="section-title">🛡️ 관리자 추가/제거</div>
-                    </div>
-                    <div class="list-container">
-                        <div class="input-group">
-                            <input type="text" id="adminInput" placeholder="닉네임 입력">
-                            <button class="btn-add" onclick="addAdmin()">추가</button>
-                        </div>
-                        <div id="adminList"></div>
-                    </div>
-                </div>
-                
-            </div>
-            
-            <!-- 탭 5: 차단 관리 -->
-            <div class="tab-content" id="tab5">
-                <div class="section">
-                    <div class="section-header">
-                        <div class="section-title">🚫 차단된 유저</div>
-                    </div>
-                    <div class="list-container">
-                        <div class="input-group">
-                            <input type="text" id="blockedUserInput" placeholder="닉네임 입력">
-                            <button class="btn-add" onclick="addBlockedUser()">추가</button>
-                        </div>
-                        <div id="blockedUserList"></div>
-                    </div>
-                </div>
-                
-                <div class="section">
-                    <div class="section-header">
-                        <div class="section-title">🔒 차단된 방</div>
-                    </div>
-                    <div class="list-container">
-                        <div class="input-group">
-                            <input type="text" id="blockedRoomInput" placeholder="방 이름 입력">
-                            <button class="btn-add" onclick="addBlockedRoom()">추가</button>
-                        </div>
-                        <div id="blockedRoomList"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <button class="save-button" onclick="saveSettings()">💾 저장 및 재시작</button>
-    </div>
-    
-    <!-- 저장 완료 모달 -->
-    <div class="modal" id="saveModal">
-        <div class="modal-content">
-            <div class="modal-title">✅ 명령어가 생성되었습니다!</div>
-            <p style="color: #666; margin: 12px 0; font-size: 14px;">💡 <strong>변경된 설정만 명령어로 생성됩니다</strong></p>
-            
-            <!-- 카톡 명령어 -->
-            <div style="background: #e7f3ff; padding: 16px; border-radius: 8px; margin: 16px 0; border-left: 4px solid #667eea;">
-                <p style="font-size: 15px; color: #333; font-weight: 600; margin-bottom: 8px;">⚡ 사용 방법</p>
-                <p style="font-size: 13px; color: #666; margin-bottom: 12px; line-height: 1.5;">
-                    <strong>1.</strong> 아래 명령어 복사<br>
-                    <strong>2.</strong> 카톡에 붙여넣기<br>
-                    <strong>3.</strong> 전송 → 즉시 적용! ⚡
-                </p>
-                <div class="modal-title" style="font-size: 14px; margin-top: 12px; color: #667eea;">💬 카톡 명령어</div>
-                <div class="modal-code" id="batchCommand" style="background: #f5f5f5; word-break: break-all; font-size: 11px; min-height: 60px;"></div>
-                <button class="modal-button primary" onclick="copyBatchCommand()" style="width: 100%; margin-top: 8px;">📋 명령어 복사</button>
-            </div>
-            
-            <div class="modal-buttons">
-                <button class="modal-button secondary" onclick="closeModal()">닫기</button>
-            </div>
-        </div>
-    </div>
-    
-    <script>
-        const ADMIN_PASSWORD = "admin123";
-        
-        let settings = {
-            joinMessage: true,
-            leaveMessage: false,
-            nicknameAlert: true,
-            superAdmins: ["방장", "영기 98 용인 남", "꿍쿤 91 분당 남", "베리 90 일산 남"],
-            admins: [],
-            blockedUsers: ["오픈채팅봇"],
-            blockedRooms: ["명령어"],
-        };
-        
-        // 초기값 저장 (변경 감지용)
-        let initialValues = {};
-        
-        function checkPassword() {
-            const input = document.getElementById('passwordInput').value;
-            if (input === ADMIN_PASSWORD) {
-                document.getElementById('passwordModal').style.display = 'none';
-                document.getElementById('mainContent').style.display = 'block';
-                
-                // 기본값 설정
-                
-                // 초기 렌더링
-                updateToggles();
-                renderSuperAdmins();
-                renderAdmins();
-                renderBlockedUsers();
-                renderBlockedRooms();
-                
-                loadSettings();
-                
-                // 초기값 저장 (변경 감지용)
-                saveInitialValues();
-            } else {
-                alert('❌ 암호가 틀렸습니다!');
-                document.getElementById('passwordInput').value = '';
-            }
-        }
-        
-        function saveInitialValues() {
-            initialValues = {
-                chatPoint: document.getElementById('chatPoint').value,
-                chatExp: document.getElementById('chatExp').value,
-                attendanceReward: document.getElementById('attendanceReward').value,
-                levelupReward: document.getElementById('levelupReward').value,
-                baseballReward: document.getElementById('baseballReward').value,
-                wordReward: document.getElementById('wordReward').value,
-                typingReward: document.getElementById('typingReward').value,
-                chosungReward: document.getElementById('chosungReward').value,
-                balanceReward: document.getElementById('balanceReward').value,
-                baseballExp: document.getElementById('baseballExp').value,
-                wordExp: document.getElementById('wordExp').value,
-                typingExp: document.getElementById('typingExp').value,
-                chosungExp: document.getElementById('chosungExp').value,
-                balanceExp: document.getElementById('balanceExp').value,
-                lottoExp: document.getElementById('lottoExp').value,
-                gambleMin: document.getElementById('gambleMin').value,
-                gambleMaxPercent: document.getElementById('gambleMaxPercent').value,
-                lottoPrice: document.getElementById('lottoPrice').value,
-                lottoFirstPrize: document.getElementById('lottoFirstPrize').value,
-                lottoSecondPrize: document.getElementById('lottoSecondPrize').value,
-                sutdaEntryFee: document.getElementById('sutdaEntryFee').value,
-                sutdaBonus: document.getElementById('sutdaBonus').value,
-                attendanceStartHour: document.getElementById('attendanceStartHour').value,
-                saveFrequency: document.getElementById('saveFrequency').value,
-                day7Bonus: document.getElementById('day7Bonus').value,
-                day14Bonus: document.getElementById('day14Bonus').value,
-                day21Bonus: document.getElementById('day21Bonus').value,
-                day28Bonus: document.getElementById('day28Bonus').value,
-                joinMessage: settings.joinMessage,
-                leaveMessage: settings.leaveMessage,
-                nicknameAlert: settings.nicknameAlert,
-                superAdmins: JSON.stringify(settings.superAdmins),
-                admins: JSON.stringify(settings.admins),
-                blockedUsers: JSON.stringify(settings.blockedUsers),
-                blockedRooms: JSON.stringify(settings.blockedRooms)
-            };
-        }
-        
-        document.getElementById('passwordInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') checkPassword();
-        });
-        
-        function switchTab(index) {
-            document.querySelectorAll('.tab').forEach((t, i) => {
-                t.classList.toggle('active', i === index);
-            });
-            document.querySelectorAll('.tab-content').forEach((t, i) => {
-                t.classList.toggle('active', i === index);
-            });
-        }
-        
-        function toggleSwitch(name) {
-            settings[name] = !settings[name];
-            updateToggles();
-        }
-        
-        function updateToggles() {
-            document.getElementById('joinMessageToggle').className = 'toggle' + (settings.joinMessage ? ' active' : '');
-            document.getElementById('leaveMessageToggle').className = 'toggle' + (settings.leaveMessage ? ' active' : '');
-            document.getElementById('nicknameAlertToggle').className = 'toggle' + (settings.nicknameAlert ? ' active' : '');
-        }
-        
-        function addSuperAdmin() {
-            const input = document.getElementById('superAdminInput');
-            const nick = input.value.trim().replace('@', '');
-            if (nick && !settings.superAdmins.includes(nick)) {
-                settings.superAdmins.push(nick);
-                input.value = '';
-                renderSuperAdmins();
-            }
-        }
-        
-        function removeSuperAdmin(nick) {
-            settings.superAdmins = settings.superAdmins.filter(n => n !== nick);
-            renderSuperAdmins();
-        }
-        
-        function renderSuperAdmins() {
-            // 추가/제거 리스트
-            const list = document.getElementById('superAdminList');
-            if (settings.superAdmins.length === 0) {
-                list.innerHTML = '<div class="empty-state">등록된 방장이 없습니다</div>';
-            } else {
-                list.innerHTML = settings.superAdmins.map(nick => 
-                    `<div class="list-item">
-                        <span>👑 ${nick}</span>
-                        <button class="btn-remove" onclick="removeSuperAdmin('${nick}')">제거</button>
-                    </div>`
-                ).join('');
-            }
-            
-            // 전체 명단 표시 (읽기 전용)
-            const listView = document.getElementById('superAdminListView');
-            const allSuperAdmins = [];
-            
-            // 추가된 방장들
-            settings.superAdmins.forEach(nick => {
-                allSuperAdmins.push({nick: nick, type: '등록'});
-            });
-            
-            if (allSuperAdmins.length === 0) {
-                listView.innerHTML = '<div class="empty-state">등록된 방장이 없습니다</div>';
-            } else {
-                listView.innerHTML = allSuperAdmins.map(item => 
-                    `<div class="list-item">
-                        <span>👑 ${item.nick} <span style="font-size: 12px; color: #999;">(${item.type})</span></span>
-                    </div>`
-                ).join('');
-            }
-        }
-        
-        function addAdmin() {
-            const input = document.getElementById('adminInput');
-            const nick = input.value.trim().replace('@', '');
-            if (nick && !settings.admins.includes(nick)) {
-                settings.admins.push(nick);
-                input.value = '';
-                renderAdmins();
-            }
-        }
-        
-        function removeAdmin(nick) {
-            settings.admins = settings.admins.filter(n => n !== nick);
-            renderAdmins();
-        }
-        
-        function renderAdmins() {
-            // 추가/제거 리스트
-            const list = document.getElementById('adminList');
-            if (settings.admins.length === 0) {
-                list.innerHTML = '<div class="empty-state">등록된 관리자가 없습니다</div>';
-            } else {
-                list.innerHTML = settings.admins.map(nick => 
-                    `<div class="list-item">
-                        <span>🛡️ ${nick}</span>
-                        <button class="btn-remove" onclick="removeAdmin('${nick}')">제거</button>
-                    </div>`
-                ).join('');
-            }
-            
-            // 전체 명단 표시 (읽기 전용)
-            const listView = document.getElementById('adminListView');
-            if (settings.admins.length === 0) {
-                listView.innerHTML = '<div class="empty-state">등록된 관리자가 없습니다</div>';
-            } else {
-                listView.innerHTML = settings.admins.map(nick => 
-                    `<div class="list-item">
-                        <span>🛡️ ${nick}</span>
-                        <button class="btn-remove" onclick="removeAdmin('${nick}')">제거</button>
-                    </div>`
-                ).join('');
-            }
-        }
-        
-        function addBlockedUser() {
-            const input = document.getElementById('blockedUserInput');
-            const nick = input.value.trim().replace('@', '');
-            if (nick && !settings.blockedUsers.includes(nick)) {
-                settings.blockedUsers.push(nick);
-                input.value = '';
-                renderBlockedUsers();
-            }
-        }
-        
-        function removeBlockedUser(nick) {
-            settings.blockedUsers = settings.blockedUsers.filter(n => n !== nick);
-            renderBlockedUsers();
-        }
-        
-        function renderBlockedUsers() {
-            const list = document.getElementById('blockedUserList');
-            if (settings.blockedUsers.length === 0) {
-                list.innerHTML = '<div class="empty-state">차단된 유저가 없습니다</div>';
-                return;
-            }
-            list.innerHTML = settings.blockedUsers.map(nick => 
-                `<div class="list-item">
-                    <span>🚫 ${nick}</span>
-                    <button class="btn-remove" onclick="removeBlockedUser('${nick}')">해제</button>
-                </div>`
-            ).join('');
-        }
-        
-        function addBlockedRoom() {
-            const input = document.getElementById('blockedRoomInput');
-            const room = input.value.trim();
-            if (room && !settings.blockedRooms.includes(room)) {
-                settings.blockedRooms.push(room);
-                input.value = '';
-                renderBlockedRooms();
-            }
-        }
-        
-        function removeBlockedRoom(room) {
-            settings.blockedRooms = settings.blockedRooms.filter(r => r !== room);
-            renderBlockedRooms();
-        }
-        
-        function renderBlockedRooms() {
-            const list = document.getElementById('blockedRoomList');
-            if (settings.blockedRooms.length === 0) {
-                list.innerHTML = '<div class="empty-state">차단된 방이 없습니다</div>';
-                return;
-            }
-            list.innerHTML = settings.blockedRooms.map(room => 
-                `<div class="list-item">
-                    <span>🔒 ${room}</span>
-                    <button class="btn-remove" onclick="removeBlockedRoom('${room}')">해제</button>
-                </div>`
-            ).join('');
-        }
-        
-        function loadSettings() {
-            const saved = localStorage.getItem('botSettings');
-            if (saved) {
-                const data = JSON.parse(saved);
-                Object.keys(data).forEach(key => {
-                    const element = document.getElementById(key);
-                    if (element && element.type !== 'checkbox') {
-                        element.value = data[key];
-                    }
-                });
-                if (data.joinMessage !== undefined) settings.joinMessage = data.joinMessage;
-                if (data.leaveMessage !== undefined) settings.leaveMessage = data.leaveMessage;
-                if (data.nicknameAlert !== undefined) settings.nicknameAlert = data.nicknameAlert;
-                if (data.superAdmins) settings.superAdmins = data.superAdmins;
-                if (data.admins) settings.admins = data.admins;
-                if (data.blockedUsers) settings.blockedUsers = data.blockedUsers;
-                if (data.blockedRooms) settings.blockedRooms = data.blockedRooms;
-                
-                // 기능활성화 체크박스 복원
-                const featureToggles = [
-                    'ATTENDANCE_ENABLED', 'POINT_SYSTEM_ENABLED', 'LEVEL_SYSTEM_ENABLED',
-                    'TITLE_SYSTEM_ENABLED', 'TITLE_AUTO_ENABLED', 'TITLE_USER_ENABLED',
-                    'CHAT_COUNT_ENABLED', 'TRANSFER_ENABLED', 'GAMBLE_ENABLED',
-                    'GAME_BASEBALL_ENABLED', 'GAME_LOTTO_ENABLED', 'GAME_WORDCHAIN_ENABLED',
-                    'GAME_CHOSUNG_ENABLED', 'GAME_TYPING_ENABLED', 'GAME_SUTDA_ENABLED',
-                    'GAME_BALANCE_ENABLED', 'SHOP_ENABLED', 'SHOP_BUY_ENABLED',
-                    'SHOP_USE_ENABLED', 'MENU_ENABLED', 'MENU_RANDOM_ENABLED',
-                    'TEACH_ENABLED', 'RANK_ENABLED', 'RANK_POINT_ENABLED',
-                    'RANK_CHAT_ENABLED', 'RANK_LEVEL_ENABLED', 'RANK_GAME_ENABLED',
-                    'INFO_ENABLED', 'MENTION_ENABLED', 'MENTION_NOTIFICATION',
-                    'PROFILE_DETECTION_ENABLED', 'PROFILE_NICKNAME_DETECTION',
-                    'PROFILE_CHANGE_NOTIFICATION', 'INACTIVE_USER_TRACKING',
-                    'ADMIN_CONTROLS_ENABLED'
-                ];
-                
-                featureToggles.forEach(key => {
-                    const element = document.getElementById(key);
-                    if (element && data[key] !== undefined) {
-                        element.checked = data[key];
-                    }
-                });
-                
-                updateToggles();
-                renderSuperAdmins();
-                renderAdmins();
-                renderBlockedUsers();
-                renderBlockedRooms();
-            }
-        }
-        
-        function saveSettings() {
-            const botConfig = {
-                "포인트설정": {
-                    "CHAT_POINT": parseInt(document.getElementById('chatPoint').value) || 1,
-                    "CHAT_EXP": parseInt(document.getElementById('chatExp').value) || 1,
-                    "ATTENDANCE_REWARD": parseInt(document.getElementById('attendanceReward').value) || 100,
-                    "LEVELUP_REWARD": parseInt(document.getElementById('levelupReward').value) || 50,
-                    "RANDOM_POINT_BOX_CHANCE": 0.005
-                },
-                "럭키박스설정": {
-                    "LUCKY_BOX_CHANCE": parseFloat(document.getElementById('luckyBoxChance').value) / 100 || 0.02,
-                    "LUCKY_BOX_MIN_POINTS": parseInt(document.getElementById('luckyBoxMinPoints').value) || 50,
-                    "LUCKY_BOX_MAX_POINTS": parseInt(document.getElementById('luckyBoxMaxPoints').value) || 200,
-                    "LUCKY_BOX_MIN_EXP": parseInt(document.getElementById('luckyBoxMinExp').value) || 10,
-                    "LUCKY_BOX_MAX_EXP": parseInt(document.getElementById('luckyBoxMaxExp').value) || 50
-                },
-                "게임보상": {
-                    "BASEBALL_REWARD": parseInt(document.getElementById('baseballReward').value) || 50,
-                    "WORD_REWARD": parseInt(document.getElementById('wordReward').value) || 20,
-                    "TYPING_REWARD": parseInt(document.getElementById('typingReward').value) || 30,
-                    "CHOSUNG_REWARD": parseInt(document.getElementById('chosungReward').value) || 15,
-                    "BALANCE_REWARD": parseInt(document.getElementById('balanceReward').value) || 100,
-                    "LOTTO_FIRST_PRIZE": 1000,
-                    "LOTTO_SECOND_PRIZE": 500,
-                },
-                "게임경험치": {
-                    "BASEBALL_EXP": parseInt(document.getElementById('baseballExp').value) || 30,
-                    "WORD_EXP": parseInt(document.getElementById('wordExp').value) || 30,
-                    "TYPING_EXP": parseInt(document.getElementById('typingExp').value) || 30,
-                    "CHOSUNG_EXP": parseInt(document.getElementById('chosungExp').value) || 20,
-                    "BALANCE_EXP": parseInt(document.getElementById('balanceExp').value) || 10,
-                    "LOTTO_EXP": parseInt(document.getElementById('lottoExp').value) || 50
-                },
-                "게임설정": {
-                    "GAMBLE_MIN": parseInt(document.getElementById('gambleMin').value) || 1000,
-                    "GAMBLE_MAX_PERCENT": parseInt(document.getElementById('gambleMaxPercent').value) || 100,
-                    "LOTTO_PRICE": parseInt(document.getElementById('lottoPrice').value) || 100,
-                    "LOTTO_FIRST_PRIZE": parseInt(document.getElementById('lottoFirstPrize').value) || 1000,
-                    "LOTTO_SECOND_PRIZE": parseInt(document.getElementById('lottoSecondPrize').value) || 500,
-                    "SUTDA_ENTRY_FEE": parseInt(document.getElementById('sutdaEntryFee').value) || 100,
-                    "SUTDA_BONUS": parseInt(document.getElementById('sutdaBonus').value) || 50,
-                    "SUTDA_REFUND": 75
-                },
-                "복권설정": {
-                    "DAILY_FREE_TICKETS": parseInt(document.getElementById('dailyFreeTickets').value) || 3,
-                    "SCRATCH_3_MATCH_POINTS": parseInt(document.getElementById('scratch3MatchPoints').value) || 200,
-                    "SCRATCH_4_MATCH_POINTS": parseInt(document.getElementById('scratch4MatchPoints').value) || 500,
-                    "SCRATCH_5_MATCH_POINTS": parseInt(document.getElementById('scratch5MatchPoints').value) || 2000,
-                    "SCRATCH_6_MATCH_POINTS": parseInt(document.getElementById('scratch6MatchPoints').value) || 5000,
-                    "SCRATCH_3_MATCH_EXP": parseInt(document.getElementById('scratch3MatchExp').value) || 30,
-                    "SCRATCH_4_MATCH_EXP": parseInt(document.getElementById('scratch4MatchExp').value) || 50,
-                    "SCRATCH_5_MATCH_EXP": parseInt(document.getElementById('scratch5MatchExp').value) || 100,
-                    "SCRATCH_6_MATCH_EXP": parseInt(document.getElementById('scratch6MatchExp').value) || 200
-                },
-                "시스템설정": {
-                    "ATTENDANCE_START_HOUR": parseInt(document.getElementById('attendanceStartHour').value) || 6,
-                    "SAVE_FREQUENCY": parseInt(document.getElementById('saveFrequency').value) || 20,
-                    "JOIN_MESSAGE_ENABLED": settings.joinMessage,
-                    "LEAVE_MESSAGE_ENABLED": settings.leaveMessage,
-                    "JOIN_COOLDOWN": 10000,
-                    "LEAVE_COOLDOWN": 10000,
-                    "NICKNAME_CHANGE_ALERT": settings.nicknameAlert
-                },
-                "출석보너스": {
-                    "DAY_7_BONUS": parseInt(document.getElementById('day7Bonus').value) || 50,
-                    "DAY_14_BONUS": parseInt(document.getElementById('day14Bonus').value) || 50,
-                    "DAY_21_BONUS": parseInt(document.getElementById('day21Bonus').value) || 50,
-                    "DAY_28_BONUS": parseInt(document.getElementById('day28Bonus').value) || 50
-                },
-                "명령어활성화": {
-                    "attendance": true,
-                    "gamble": true,
-                    "baseball": true,
-                    "lotto": true,
-                    "wordchain": true,
-                    "chosung": true,
-                    "typing": true,
-                    "sutda": true,
-                    "balance": true,
-                    "transfer": true,
-                    "shop": true
-                },
-                "기능활성화": {
-                    "ATTENDANCE_ENABLED": document.getElementById('ATTENDANCE_ENABLED')?.checked ?? true,
-                    "POINT_SYSTEM_ENABLED": document.getElementById('POINT_SYSTEM_ENABLED')?.checked ?? true,
-                    "LEVEL_SYSTEM_ENABLED": document.getElementById('LEVEL_SYSTEM_ENABLED')?.checked ?? true,
-                    "TITLE_SYSTEM_ENABLED": document.getElementById('TITLE_SYSTEM_ENABLED')?.checked ?? true,
-                    "TITLE_AUTO_ENABLED": document.getElementById('TITLE_AUTO_ENABLED')?.checked ?? true,
-                    "TITLE_USER_ENABLED": document.getElementById('TITLE_USER_ENABLED')?.checked ?? true,
-                    "CHAT_COUNT_ENABLED": document.getElementById('CHAT_COUNT_ENABLED')?.checked ?? true,
-                    "TRANSFER_ENABLED": document.getElementById('TRANSFER_ENABLED')?.checked ?? true,
-                    "GAMBLE_ENABLED": document.getElementById('GAMBLE_ENABLED')?.checked ?? true,
-                    "GAME_BASEBALL_ENABLED": document.getElementById('GAME_BASEBALL_ENABLED')?.checked ?? true,
-                    "GAME_LOTTO_ENABLED": document.getElementById('GAME_LOTTO_ENABLED')?.checked ?? true,
-                    "GAME_WORDCHAIN_ENABLED": document.getElementById('GAME_WORDCHAIN_ENABLED')?.checked ?? true,
-                    "GAME_CHOSUNG_ENABLED": document.getElementById('GAME_CHOSUNG_ENABLED')?.checked ?? true,
-                    "GAME_TYPING_ENABLED": document.getElementById('GAME_TYPING_ENABLED')?.checked ?? true,
-                    "GAME_SUTDA_ENABLED": document.getElementById('GAME_SUTDA_ENABLED')?.checked ?? true,
-                    "GAME_BALANCE_ENABLED": document.getElementById('GAME_BALANCE_ENABLED')?.checked ?? true,
-                    "SHOP_ENABLED": document.getElementById('SHOP_ENABLED')?.checked ?? true,
-                    "SHOP_BUY_ENABLED": document.getElementById('SHOP_BUY_ENABLED')?.checked ?? true,
-                    "SHOP_USE_ENABLED": document.getElementById('SHOP_USE_ENABLED')?.checked ?? true,
-                    "MENU_ENABLED": document.getElementById('MENU_ENABLED')?.checked ?? true,
-                    "MENU_RANDOM_ENABLED": document.getElementById('MENU_RANDOM_ENABLED')?.checked ?? true,
-                    "TEACH_ENABLED": document.getElementById('TEACH_ENABLED')?.checked ?? true,
-                    "RANK_ENABLED": document.getElementById('RANK_ENABLED')?.checked ?? true,
-                    "RANK_POINT_ENABLED": document.getElementById('RANK_POINT_ENABLED')?.checked ?? true,
-                    "RANK_CHAT_ENABLED": document.getElementById('RANK_CHAT_ENABLED')?.checked ?? true,
-                    "RANK_LEVEL_ENABLED": document.getElementById('RANK_LEVEL_ENABLED')?.checked ?? true,
-                    "RANK_GAME_ENABLED": document.getElementById('RANK_GAME_ENABLED')?.checked ?? true,
-                    "INFO_ENABLED": document.getElementById('INFO_ENABLED')?.checked ?? true,
-                    "MENTION_ENABLED": document.getElementById('MENTION_ENABLED')?.checked ?? true,
-                    "MENTION_NOTIFICATION": document.getElementById('MENTION_NOTIFICATION')?.checked ?? true,
-                    "PROFILE_DETECTION_ENABLED": document.getElementById('PROFILE_DETECTION_ENABLED')?.checked ?? true,
-                    "PROFILE_NICKNAME_DETECTION": document.getElementById('PROFILE_NICKNAME_DETECTION')?.checked ?? true,
-                    "PROFILE_CHANGE_NOTIFICATION": document.getElementById('PROFILE_CHANGE_NOTIFICATION')?.checked ?? true,
-                    "INACTIVE_USER_TRACKING": document.getElementById('INACTIVE_USER_TRACKING')?.checked ?? true,
-                    "ADMIN_CONTROLS_ENABLED": document.getElementById('ADMIN_CONTROLS_ENABLED')?.checked ?? true,
-                    "FORTUNE_ENABLED": document.getElementById('FORTUNE_ENABLED')?.checked ?? true,
-                    "RESET_MODE": "기본"
-                },
-                "생일설정": {
-                    "BIRTHDAY_BONUS_POINTS": parseInt(document.getElementById('birthdayBonusPoints').value) || 2000,
-                    "BIRTHDAY_BONUS_ENABLED": document.getElementById('BIRTHDAY_BONUS_ENABLED')?.checked ?? true,
-                    "BIRTHDAY_AUTO_MESSAGE": document.getElementById('BIRTHDAY_AUTO_MESSAGE')?.checked ?? true,
-                    "BIRTHDAY_TITLE": document.getElementById('birthdayTitle').value || "🎂 생일 주인공"
-                }
-            };
-            
-            const config = {
-                "admins": settings.admins,
-                "superAdmins": settings.superAdmins,
-                "blockedUsers": settings.blockedUsers,
-                "blockedRooms": settings.blockedRooms,
-                "ATTENDANCE_START_HOUR": botConfig.시스템설정.ATTENDANCE_START_HOUR,
-                "SAVE_FREQUENCY": botConfig.시스템설정.SAVE_FREQUENCY,
-                "CHAT_POINT": botConfig.포인트설정.CHAT_POINT,
-                "CHAT_EXP": botConfig.포인트설정.CHAT_EXP,
-                "RANDOM_POINT_BOX_CHANCE": 0.005,
-                "lottoTicketPrice": 85,
-                "lottoPrizes": {"first": 500, "second": 250},
-                "lastWeeklyReward": null,
-                "lastMonthlyReward": null
-            };
-            
-            localStorage.setItem('botSettings', JSON.stringify({
-                chatPoint: document.getElementById('chatPoint').value,
-                chatExp: document.getElementById('chatExp').value,
-                attendanceReward: document.getElementById('attendanceReward').value,
-                levelupReward: document.getElementById('levelupReward').value,
-                baseballReward: document.getElementById('baseballReward').value,
-                wordReward: document.getElementById('wordReward').value,
-                typingReward: document.getElementById('typingReward').value,
-                chosungReward: document.getElementById('chosungReward').value,
-                balanceReward: document.getElementById('balanceReward').value,
-                baseballExp: document.getElementById('baseballExp').value,
-                wordExp: document.getElementById('wordExp').value,
-                typingExp: document.getElementById('typingExp').value,
-                chosungExp: document.getElementById('chosungExp').value,
-                balanceExp: document.getElementById('balanceExp').value,
-                lottoExp: document.getElementById('lottoExp').value,
-                gambleMin: document.getElementById('gambleMin').value,
-                gambleMaxPercent: document.getElementById('gambleMaxPercent').value,
-                lottoPrice: document.getElementById('lottoPrice').value,
-                lottoFirstPrize: document.getElementById('lottoFirstPrize').value,
-                lottoSecondPrize: document.getElementById('lottoSecondPrize').value,
-                sutdaEntryFee: document.getElementById('sutdaEntryFee').value,
-                sutdaBonus: document.getElementById('sutdaBonus').value,
-                // 복권 설정
-                dailyFreeTickets: document.getElementById('dailyFreeTickets').value,
-                scratch3MatchPoints: document.getElementById('scratch3MatchPoints').value,
-                scratch4MatchPoints: document.getElementById('scratch4MatchPoints').value,
-                scratch5MatchPoints: document.getElementById('scratch5MatchPoints').value,
-                scratch6MatchPoints: document.getElementById('scratch6MatchPoints').value,
-                scratch3MatchExp: document.getElementById('scratch3MatchExp').value,
-                scratch4MatchExp: document.getElementById('scratch4MatchExp').value,
-                scratch5MatchExp: document.getElementById('scratch5MatchExp').value,
-                scratch6MatchExp: document.getElementById('scratch6MatchExp').value,
-                attendanceStartHour: document.getElementById('attendanceStartHour').value,
-                saveFrequency: document.getElementById('saveFrequency').value,
-                day7Bonus: document.getElementById('day7Bonus').value,
-                day14Bonus: document.getElementById('day14Bonus').value,
-                day21Bonus: document.getElementById('day21Bonus').value,
-                day28Bonus: document.getElementById('day28Bonus').value,
-                joinMessage: settings.joinMessage,
-                leaveMessage: settings.leaveMessage,
-                nicknameAlert: settings.nicknameAlert,
-                superAdmins: settings.superAdmins,
-                admins: settings.admins,
-                blockedUsers: settings.blockedUsers,
-                blockedRooms: settings.blockedRooms,
-                // 기능활성화 체크박스 상태
-                ATTENDANCE_ENABLED: document.getElementById('ATTENDANCE_ENABLED')?.checked ?? true,
-                POINT_SYSTEM_ENABLED: document.getElementById('POINT_SYSTEM_ENABLED')?.checked ?? true,
-                LEVEL_SYSTEM_ENABLED: document.getElementById('LEVEL_SYSTEM_ENABLED')?.checked ?? true,
-                TITLE_SYSTEM_ENABLED: document.getElementById('TITLE_SYSTEM_ENABLED')?.checked ?? true,
-                TITLE_AUTO_ENABLED: document.getElementById('TITLE_AUTO_ENABLED')?.checked ?? true,
-                TITLE_USER_ENABLED: document.getElementById('TITLE_USER_ENABLED')?.checked ?? true,
-                CHAT_COUNT_ENABLED: document.getElementById('CHAT_COUNT_ENABLED')?.checked ?? true,
-                TRANSFER_ENABLED: document.getElementById('TRANSFER_ENABLED')?.checked ?? true,
-                GAMBLE_ENABLED: document.getElementById('GAMBLE_ENABLED')?.checked ?? true,
-                GAME_BASEBALL_ENABLED: document.getElementById('GAME_BASEBALL_ENABLED')?.checked ?? true,
-                GAME_LOTTO_ENABLED: document.getElementById('GAME_LOTTO_ENABLED')?.checked ?? true,
-                GAME_WORDCHAIN_ENABLED: document.getElementById('GAME_WORDCHAIN_ENABLED')?.checked ?? true,
-                GAME_CHOSUNG_ENABLED: document.getElementById('GAME_CHOSUNG_ENABLED')?.checked ?? true,
-                GAME_TYPING_ENABLED: document.getElementById('GAME_TYPING_ENABLED')?.checked ?? true,
-                GAME_SUTDA_ENABLED: document.getElementById('GAME_SUTDA_ENABLED')?.checked ?? true,
-                GAME_BALANCE_ENABLED: document.getElementById('GAME_BALANCE_ENABLED')?.checked ?? true,
-                SHOP_ENABLED: document.getElementById('SHOP_ENABLED')?.checked ?? true,
-                SHOP_BUY_ENABLED: document.getElementById('SHOP_BUY_ENABLED')?.checked ?? true,
-                SHOP_USE_ENABLED: document.getElementById('SHOP_USE_ENABLED')?.checked ?? true,
-                MENU_ENABLED: document.getElementById('MENU_ENABLED')?.checked ?? true,
-                MENU_RANDOM_ENABLED: document.getElementById('MENU_RANDOM_ENABLED')?.checked ?? true,
-                TEACH_ENABLED: document.getElementById('TEACH_ENABLED')?.checked ?? true,
-                RANK_ENABLED: document.getElementById('RANK_ENABLED')?.checked ?? true,
-                RANK_POINT_ENABLED: document.getElementById('RANK_POINT_ENABLED')?.checked ?? true,
-                RANK_CHAT_ENABLED: document.getElementById('RANK_CHAT_ENABLED')?.checked ?? true,
-                RANK_LEVEL_ENABLED: document.getElementById('RANK_LEVEL_ENABLED')?.checked ?? true,
-                RANK_GAME_ENABLED: document.getElementById('RANK_GAME_ENABLED')?.checked ?? true,
-                INFO_ENABLED: document.getElementById('INFO_ENABLED')?.checked ?? true,
-                MENTION_ENABLED: document.getElementById('MENTION_ENABLED')?.checked ?? true,
-                MENTION_NOTIFICATION: document.getElementById('MENTION_NOTIFICATION')?.checked ?? true,
-                PROFILE_DETECTION_ENABLED: document.getElementById('PROFILE_DETECTION_ENABLED')?.checked ?? true,
-                PROFILE_NICKNAME_DETECTION: document.getElementById('PROFILE_NICKNAME_DETECTION')?.checked ?? true,
-                PROFILE_CHANGE_NOTIFICATION: document.getElementById('PROFILE_CHANGE_NOTIFICATION')?.checked ?? true,
-                INACTIVE_USER_TRACKING: document.getElementById('INACTIVE_USER_TRACKING')?.checked ?? true,
-                ADMIN_CONTROLS_ENABLED: document.getElementById('ADMIN_CONTROLS_ENABLED')?.checked ?? true
-            }));
-            
-            // JSON 명령어 생성 (변경된 것만)
-            const batchCommand = {};
-            
-            // 포인트 변경 감지
-            const pointChanges = {};
-            if (botConfig.포인트설정.CHAT_POINT != initialValues.chatPoint) 
-                pointChanges.채팅포인트 = botConfig.포인트설정.CHAT_POINT;
-            if (botConfig.포인트설정.CHAT_EXP != initialValues.chatExp)
-                pointChanges.채팅경험치 = botConfig.포인트설정.CHAT_EXP;
-            if (botConfig.포인트설정.ATTENDANCE_REWARD != initialValues.attendanceReward)
-                pointChanges.출석보상 = botConfig.포인트설정.ATTENDANCE_REWARD;
-            if (botConfig.포인트설정.LEVELUP_REWARD != initialValues.levelupReward)
-                pointChanges.레벨업보상 = botConfig.포인트설정.LEVELUP_REWARD;
-            if (Object.keys(pointChanges).length > 0) batchCommand.포인트 = pointChanges;
-            
-            // 게임보상 변경 감지
-            const gameRewardChanges = {};
-            if (botConfig.게임보상.BASEBALL_REWARD != initialValues.baseballReward)
-                gameRewardChanges.야구 = botConfig.게임보상.BASEBALL_REWARD;
-            if (botConfig.게임보상.WORD_REWARD != initialValues.wordReward)
-                gameRewardChanges.끝말잇기 = botConfig.게임보상.WORD_REWARD;
-            if (botConfig.게임보상.TYPING_REWARD != initialValues.typingReward)
-                gameRewardChanges.타자 = botConfig.게임보상.TYPING_REWARD;
-            if (botConfig.게임보상.CHOSUNG_REWARD != initialValues.chosungReward)
-                gameRewardChanges.초성 = botConfig.게임보상.CHOSUNG_REWARD;
-            if (botConfig.게임보상.BALANCE_REWARD != initialValues.balanceReward)
-                gameRewardChanges.밸런스 = botConfig.게임보상.BALANCE_REWARD;
-            if (Object.keys(gameRewardChanges).length > 0) batchCommand.게임보상 = gameRewardChanges;
-            
-            // 게임경험치 변경 감지
-            const gameExpChanges = {};
-            if (botConfig.게임경험치.BASEBALL_EXP != initialValues.baseballExp)
-                gameExpChanges.야구 = botConfig.게임경험치.BASEBALL_EXP;
-            if (botConfig.게임경험치.WORD_EXP != initialValues.wordExp)
-                gameExpChanges.끝말잇기 = botConfig.게임경험치.WORD_EXP;
-            if (botConfig.게임경험치.TYPING_EXP != initialValues.typingExp)
-                gameExpChanges.타자 = botConfig.게임경험치.TYPING_EXP;
-            if (botConfig.게임경험치.CHOSUNG_EXP != initialValues.chosungExp)
-                gameExpChanges.초성 = botConfig.게임경험치.CHOSUNG_EXP;
-            if (botConfig.게임경험치.BALANCE_EXP != initialValues.balanceExp)
-                gameExpChanges.밸런스 = botConfig.게임경험치.BALANCE_EXP;
-            if (botConfig.게임경험치.LOTTO_EXP != initialValues.lottoExp)
-                gameExpChanges.로또 = botConfig.게임경험치.LOTTO_EXP;
-            if (Object.keys(gameExpChanges).length > 0) batchCommand.게임경험치 = gameExpChanges;
-            
-            // 게임설정 변경 감지
-            const gameSettingChanges = {};
-            if (botConfig.게임설정.GAMBLE_MIN != initialValues.gambleMin)
-                gameSettingChanges.도박최소 = botConfig.게임설정.GAMBLE_MIN;
-            if (botConfig.게임설정.GAMBLE_MAX_PERCENT != initialValues.gambleMaxPercent)
-                gameSettingChanges.도박변동률 = botConfig.게임설정.GAMBLE_MAX_PERCENT;
-            if (botConfig.게임설정.LOTTO_PRICE != initialValues.lottoPrice)
-                gameSettingChanges.로또가격 = botConfig.게임설정.LOTTO_PRICE;
-            if (botConfig.게임설정.LOTTO_FIRST_PRIZE != initialValues.lottoFirstPrize)
-                gameSettingChanges.로또1등 = botConfig.게임설정.LOTTO_FIRST_PRIZE;
-            if (botConfig.게임설정.LOTTO_SECOND_PRIZE != initialValues.lottoSecondPrize)
-                gameSettingChanges.로또2등 = botConfig.게임설정.LOTTO_SECOND_PRIZE;
-            if (botConfig.게임설정.SUTDA_ENTRY_FEE != initialValues.sutdaEntryFee)
-                gameSettingChanges.섯다참가비 = botConfig.게임설정.SUTDA_ENTRY_FEE;
-            if (botConfig.게임설정.SUTDA_BONUS != initialValues.sutdaBonus)
-                gameSettingChanges.섯다보너스 = botConfig.게임설정.SUTDA_BONUS;
-            if (Object.keys(gameSettingChanges).length > 0) batchCommand.게임설정 = gameSettingChanges;
-            
-            // 시스템 변경 감지
-            const systemChanges = {};
-            if (botConfig.시스템설정.ATTENDANCE_START_HOUR != initialValues.attendanceStartHour)
-                systemChanges.출석시작시간 = botConfig.시스템설정.ATTENDANCE_START_HOUR;
-            if (botConfig.시스템설정.SAVE_FREQUENCY != initialValues.saveFrequency)
-                systemChanges.저장빈도 = botConfig.시스템설정.SAVE_FREQUENCY;
-            if (botConfig.시스템설정.JOIN_MESSAGE_ENABLED != initialValues.joinMessage)
-                systemChanges.입장메시지 = botConfig.시스템설정.JOIN_MESSAGE_ENABLED;
-            if (botConfig.시스템설정.LEAVE_MESSAGE_ENABLED != initialValues.leaveMessage)
-                systemChanges.퇴장메시지 = botConfig.시스템설정.LEAVE_MESSAGE_ENABLED;
-            if (Object.keys(systemChanges).length > 0) batchCommand.시스템 = systemChanges;
-            
-            // 출석보너스 변경 감지
-            const bonusChanges = {};
-            if (botConfig.출석보너스.DAY_7_BONUS != initialValues.day7Bonus)
-                bonusChanges.day7 = botConfig.출석보너스.DAY_7_BONUS;
-            if (botConfig.출석보너스.DAY_14_BONUS != initialValues.day14Bonus)
-                bonusChanges.day14 = botConfig.출석보너스.DAY_14_BONUS;
-            if (botConfig.출석보너스.DAY_21_BONUS != initialValues.day21Bonus)
-                bonusChanges.day21 = botConfig.출석보너스.DAY_21_BONUS;
-            if (botConfig.출석보너스.DAY_28_BONUS != initialValues.day28Bonus)
-                bonusChanges.day28 = botConfig.출석보너스.DAY_28_BONUS;
-            if (Object.keys(bonusChanges).length > 0) batchCommand.출석보너스 = bonusChanges;
-            
-            // 방장 변경 감지
-            const currentSuperAdmins = JSON.stringify(settings.superAdmins);
-            if (currentSuperAdmins !== initialValues.superAdmins) {
-                const initial = JSON.parse(initialValues.superAdmins);
-                const added = settings.superAdmins.filter(x => !initial.includes(x));
-                const removed = initial.filter(x => !settings.superAdmins.includes(x));
-                if (added.length > 0) batchCommand.방장추가 = added;
-                if (removed.length > 0) batchCommand.방장제거 = removed;
-            }
-            
-            // 관리자 변경 감지
-            const currentAdmins = JSON.stringify(settings.admins);
-            if (currentAdmins !== initialValues.admins) {
-                const initial = JSON.parse(initialValues.admins);
-                const added = settings.admins.filter(x => !initial.includes(x));
-                const removed = initial.filter(x => !settings.admins.includes(x));
-                if (added.length > 0) batchCommand.관리자추가 = added;
-                if (removed.length > 0) batchCommand.관리자제거 = removed;
-            }
-            
-            // 차단 변경 감지
-            const currentBlockedUsers = JSON.stringify(settings.blockedUsers);
-            if (currentBlockedUsers !== initialValues.blockedUsers) {
-                const initial = JSON.parse(initialValues.blockedUsers);
-                const added = settings.blockedUsers.filter(x => !initial.includes(x));
-                const removed = initial.filter(x => !settings.blockedUsers.includes(x));
-                if (added.length > 0) batchCommand.차단추가 = added;
-                if (removed.length > 0) batchCommand.차단해제 = removed;
-            }
-            
-            // 방차단 변경 감지
-            const currentBlockedRooms = JSON.stringify(settings.blockedRooms);
-            if (currentBlockedRooms !== initialValues.blockedRooms) {
-                const initial = JSON.parse(initialValues.blockedRooms);
-                const added = settings.blockedRooms.filter(x => !initial.includes(x));
-                const removed = initial.filter(x => !settings.blockedRooms.includes(x));
-                if (added.length > 0) batchCommand.방차단추가 = added;
-                if (removed.length > 0) batchCommand.방차단해제 = removed;
-            }
-            
-            // 명령어 생성
-            let commandStr = "";
-            if (Object.keys(batchCommand).length === 0) {
-                commandStr = "변경된 설정이 없습니다.";
-            } else {
-                commandStr = ".일괄설정 " + JSON.stringify(batchCommand);
-            }
-            
-            document.getElementById('batchCommand').textContent = commandStr;
-            document.getElementById('saveModal').classList.add('show');
-        }
-        
-        function copyBatchCommand() {
-            const command = document.getElementById('batchCommand').textContent;
-            
-            navigator.clipboard.writeText(command).then(() => {
-                alert('✅ 명령어가 복사되었습니다!\n\n카톡에 붙여넣고 전송하세요!');
-            }).catch(() => {
-                alert('복사에 실패했습니다. 수동으로 복사해주세요.');
-            });
-        }
-        
-        function copyAllConfig() {
-            const botConfig = document.getElementById('botConfigCode').textContent;
-            const config = document.getElementById('configCode').textContent;
-            const combined = "=== botConfig.json ===\n\n" + botConfig + "\n\n=== config.json ===\n\n" + config;
-            
-            navigator.clipboard.writeText(combined).then(() => {
-                alert('✅ 설정이 복사되었습니다!\n\n각 파일에 맞는 내용을 붙여넣으세요.');
-            }).catch(() => {
-                alert('복사에 실패했습니다. 수동으로 복사해주세요.');
-            });
-        }
-        
-        
-        function closeModal() {
-            document.getElementById('saveModal').classList.remove('show');
-        }
-    </script>
+<script>
+// ===== 설정 스키마 =====
+var SCHEMA = {
+  "포인트설정":{CHAT_POINT:"int",CHAT_EXP:"int",ATTENDANCE_REWARD:"int",ATTENDANCE_EXP:"int",LEVELUP_REWARD:"int",GAMBLE_MIN:"int",GAMBLE_MAX_PERCENT:"int",CHAT_MIN_LEN:"int"},
+  "럭키박스설정":{LUCKY_BOX_CHANCE:"float",LUCKY_BOX_MIN_POINTS:"int",LUCKY_BOX_MAX_POINTS:"int",LUCKY_BOX_MIN_EXP:"int",LUCKY_BOX_MAX_EXP:"int"},
+  "게임보상":{BASEBALL_REWARD:"int",WORD_REWARD:"int",TYPING_REWARD:"int",CHOSUNG_REWARD:"int",BALANCE_REWARD:"int",SUTDA_BONUS:"int",SUTDA_REFUND:"int",SUTDA_FEE:"int",LOTTO_PRICE:"int",LOTTO_FIRST_PRIZE:"int",LOTTO_SECOND_PRIZE:"int",LOTTO_THIRD_PRIZE:"int",RPS_FEE:"int",RPS_WIN:"int",RPS_DRAW:"int",RPS_DAILY_LIMIT:"int",BASEBALL_EXP:"int",WORD_EXP:"int",TYPING_EXP:"int",CHOSUNG_EXP:"int",BALANCE_EXP:"int"},
+  "출석보너스":{DAY_7_BONUS:"int",DAY_14_BONUS:"int",DAY_21_BONUS:"int",DAY_28_BONUS:"int"},
+  "시스템설정":{ATTENDANCE_START_HOUR:"int",JOIN_MESSAGE_ENABLED:"bool",LEAVE_MESSAGE_ENABLED:"bool"},
+  "생일설정":{BIRTHDAY_BONUS_POINTS:"int",BIRTHDAY_BONUS_ENABLED:"bool",BIRTHDAY_AUTO_MESSAGE:"bool",BIRTHDAY_TITLE:"text"},
+  "타로설정":{GROQ_API_KEY:"text",GROQ_MODEL:"text"},
+  "기능활성화":{POINT_SYSTEM_ENABLED:"bool",LEVEL_SYSTEM_ENABLED:"bool",CHAT_COUNT_ENABLED:"bool",LUCKY_BOX_ENABLED:"bool",TRANSFER_ENABLED:"bool",GAMBLE_ENABLED:"bool",SHOP_ENABLED:"bool",MENTION_ENABLED:"bool",GAME_BASEBALL_ENABLED:"bool",GAME_LOTTO_ENABLED:"bool",GAME_WORDCHAIN_ENABLED:"bool",GAME_CHOSUNG_ENABLED:"bool",GAME_TYPING_ENABLED:"bool",GAME_BALANCE_ENABLED:"bool",GAME_SUTDA_ENABLED:"bool",GAME_RPS_ENABLED:"bool",PROFILE_DETECTION_ENABLED:"bool",INACTIVE_USER_TRACKING:"bool"}
+};
+var DEFAULTS = {
+  "포인트설정":{CHAT_POINT:1,CHAT_EXP:1,ATTENDANCE_REWARD:100,ATTENDANCE_EXP:30,LEVELUP_REWARD:50,GAMBLE_MIN:1000,GAMBLE_MAX_PERCENT:100,CHAT_MIN_LEN:3},
+  "럭키박스설정":{LUCKY_BOX_CHANCE:0.005,LUCKY_BOX_MIN_POINTS:50,LUCKY_BOX_MAX_POINTS:200,LUCKY_BOX_MIN_EXP:10,LUCKY_BOX_MAX_EXP:50},
+  "게임보상":{BASEBALL_REWARD:100,WORD_REWARD:50,TYPING_REWARD:80,CHOSUNG_REWARD:30,BALANCE_REWARD:100,SUTDA_BONUS:50,SUTDA_REFUND:75,SUTDA_FEE:100,LOTTO_PRICE:100,LOTTO_FIRST_PRIZE:1000,LOTTO_SECOND_PRIZE:500,LOTTO_THIRD_PRIZE:100,RPS_FEE:500,RPS_WIN:2000,RPS_DRAW:1000,RPS_DAILY_LIMIT:20,BASEBALL_EXP:30,WORD_EXP:20,TYPING_EXP:25,CHOSUNG_EXP:15,BALANCE_EXP:20},
+  "출석보너스":{DAY_7_BONUS:50,DAY_14_BONUS:50,DAY_21_BONUS:50,DAY_28_BONUS:50},
+  "시스템설정":{ATTENDANCE_START_HOUR:6,JOIN_MESSAGE_ENABLED:true,LEAVE_MESSAGE_ENABLED:false},
+  "생일설정":{BIRTHDAY_BONUS_POINTS:2000,BIRTHDAY_BONUS_ENABLED:true,BIRTHDAY_AUTO_MESSAGE:true,BIRTHDAY_TITLE:"생일 주인공"},
+  "타로설정":{GROQ_API_KEY:"",GROQ_MODEL:"llama-3.3-70b-versatile"},
+  "기능활성화":{POINT_SYSTEM_ENABLED:true,LEVEL_SYSTEM_ENABLED:true,CHAT_COUNT_ENABLED:true,LUCKY_BOX_ENABLED:true,TRANSFER_ENABLED:true,GAMBLE_ENABLED:true,SHOP_ENABLED:true,MENTION_ENABLED:true,GAME_BASEBALL_ENABLED:true,GAME_LOTTO_ENABLED:true,GAME_WORDCHAIN_ENABLED:true,GAME_CHOSUNG_ENABLED:true,GAME_TYPING_ENABLED:true,GAME_BALANCE_ENABLED:true,GAME_SUTDA_ENABLED:true,GAME_RPS_ENABLED:true,PROFILE_DETECTION_ENABLED:true,INACTIVE_USER_TRACKING:true}
+};
+var LABELS = {
+  CHAT_POINT:"채팅 1회 포인트",CHAT_EXP:"채팅 1회 경험치",ATTENDANCE_REWARD:"출석 보상 포인트",ATTENDANCE_EXP:"출석 경험치",LEVELUP_REWARD:"레벨업 보상 포인트",GAMBLE_MIN:"도박 최소 베팅",GAMBLE_MAX_PERCENT:"도박 최대 변동률(%)",CHAT_MIN_LEN:"보상 최소 글자수",
+  LUCKY_BOX_CHANCE:"럭키박스 확률 (0~1)",LUCKY_BOX_MIN_POINTS:"럭키박스 최소 포인트",LUCKY_BOX_MAX_POINTS:"럭키박스 최대 포인트",LUCKY_BOX_MIN_EXP:"럭키박스 최소 경험치",LUCKY_BOX_MAX_EXP:"럭키박스 최대 경험치",
+  BASEBALL_REWARD:"숫자야구 승리 포인트",WORD_REWARD:"끝말잇기 승리 포인트",TYPING_REWARD:"타자게임 승리 포인트",CHOSUNG_REWARD:"초성게임 정답 포인트",BALANCE_REWARD:"밸런스게임 보상 포인트",SUTDA_BONUS:"섯다 우승 보너스",SUTDA_REFUND:"섯다 무승부 환불(%)",SUTDA_FEE:"섯다 참가비",LOTTO_PRICE:"로또 1장 가격",LOTTO_FIRST_PRIZE:"로또 1등 상금",LOTTO_SECOND_PRIZE:"로또 2등 상금",LOTTO_THIRD_PRIZE:"로또 3등 상금",RPS_FEE:"가위바위보 참가비",RPS_WIN:"가위바위보 승리 포인트",RPS_DRAW:"가위바위보 무승부 포인트",RPS_DAILY_LIMIT:"가위바위보 하루 횟수",BASEBALL_EXP:"숫자야구 경험치",WORD_EXP:"끝말잇기 경험치",TYPING_EXP:"타자게임 경험치",CHOSUNG_EXP:"초성게임 경험치",BALANCE_EXP:"밸런스게임 경험치",
+  DAY_7_BONUS:"7일 연속 보너스",DAY_14_BONUS:"14일 연속 보너스",DAY_21_BONUS:"21일 연속 보너스",DAY_28_BONUS:"28일 연속 보너스",
+  ATTENDANCE_START_HOUR:"출석 시작 시각 (시)",JOIN_MESSAGE_ENABLED:"입장 인사 메시지",LEAVE_MESSAGE_ENABLED:"퇴장 메시지",
+  BIRTHDAY_BONUS_POINTS:"생일 축하 포인트",BIRTHDAY_BONUS_ENABLED:"생일 포인트 지급",BIRTHDAY_AUTO_MESSAGE:"생일 자동 축하 메시지",BIRTHDAY_TITLE:"생일 칭호 이름",
+  GROQ_API_KEY:"Groq API 키",GROQ_MODEL:"Groq 모델명",
+  POINT_SYSTEM_ENABLED:"포인트 시스템",LEVEL_SYSTEM_ENABLED:"레벨 시스템",CHAT_COUNT_ENABLED:"채팅수 집계",LUCKY_BOX_ENABLED:"럭키박스",TRANSFER_ENABLED:"포인트 이체",GAMBLE_ENABLED:"도박",SHOP_ENABLED:"상점",MENTION_ENABLED:"멘션 감지",GAME_BASEBALL_ENABLED:"숫자야구",GAME_LOTTO_ENABLED:"로또",GAME_WORDCHAIN_ENABLED:"끝말잇기",GAME_CHOSUNG_ENABLED:"초성게임",GAME_TYPING_ENABLED:"타자게임",GAME_BALANCE_ENABLED:"밸런스게임",GAME_SUTDA_ENABLED:"섯다",GAME_RPS_ENABLED:"가위바위보",PROFILE_DETECTION_ENABLED:"프로필(닉변) 감지",INACTIVE_USER_TRACKING:"비활성 유저 추적"
+};
+// 탭 → 섹션
+var TABS = [
+  {id:"basic", name:"⚙️ 기본설정", secs:["시스템설정","출석보너스","생일설정","타로설정"]},
+  {id:"point", name:"🪙 포인트", secs:["포인트설정","럭키박스설정"]},
+  {id:"game",  name:"🎮 게임", secs:["게임보상"]},
+  {id:"feat",  name:"🔧 기능활성화", secs:["기능활성화"]},
+  {id:"super", name:"👥 방장", custom:"super"},
+  {id:"block", name:"🚫 차단", custom:"block"}
+];
+
+var roster = { users:{}, rooms:{} };
+var state = { superAdmins:[], admins:[], blockedRooms:[], banned:[] };
+
+function $(id){return document.getElementById(id);}
+function fid(sec,key){return "f__"+sec+"__"+key;}
+function arrHas(a,v){return a.indexOf(v)!==-1;}
+function arrDel(a,v){var i=a.indexOf(v);if(i!==-1)a.splice(i,1);}
+function arrAdd(a,v){if(a.indexOf(v)===-1)a.push(v);}
+
+// ---- 탭/폼 빌드 ----
+function buildTabs(){
+  var nav="", pan="";
+  for(var i=0;i<TABS.length;i++){
+    var t=TABS[i];
+    nav+='<button id="tab_'+t.id+'" class="'+(i===0?"on":"")+'" onclick="showTab(\''+t.id+'\')">'+t.name+'</button>';
+    pan+='<div class="panel '+(i===0?"on":"")+'" id="panel_'+t.id+'">'+panelHtml(t)+'</div>';
+  }
+  $("tabs").innerHTML=nav; $("panels").innerHTML=pan;
+}
+function panelHtml(t){
+  if(t.custom==="super") return '<div class="card"><h2 style="margin-top:0">권한 관리</h2><div class="muted" style="margin-bottom:8px">유저별로 방장 / 관리자 / 일반을 지정합니다.</div><input class="filter" id="superFilter" type="text" placeholder="닉네임 검색..." oninput="renderSuper()"><div id="superList"></div></div>';
+  if(t.custom==="block") return ''+
+    '<div class="card"><h2 style="margin-top:0">유저 차단(밴)</h2><div class="muted" style="margin-bottom:8px">체크하면 그 유저가 봇 사용 불가가 됩니다.</div><input class="filter" id="banFilter" type="text" placeholder="닉네임 검색..." oninput="renderBan()"><div id="banList"></div></div>'+
+    '<div class="card"><h2>방 차단</h2><div class="muted" style="margin-bottom:8px">체크하면 그 방에서 봇이 비활성화됩니다.</div><div id="blockList"></div></div>';
+  var h="";
+  for(var s=0;s<t.secs.length;s++){
+    var sec=t.secs[s], fields=SCHEMA[sec]; if(!fields)continue;
+    h+='<div class="card"><h2>'+sec+'</h2>';
+    for(var key in fields){
+      var type=fields[key],id=fid(sec,key),ko=LABELS[key]||key;
+      h+='<div class="row"><label>'+ko+'<span class="key">'+key+'</span></label>';
+      if(type==="bool")h+='<input type="checkbox" id="'+id+'">';
+      else if(type==="text")h+='<input type="text" class="wide" id="'+id+'">';
+      else h+='<input type="number" id="'+id+'" step="'+(type==="float"?"any":"1")+'">';
+      h+='</div>';
+    }
+    h+='</div>';
+  }
+  return h;
+}
+function showTab(id){
+  var t=TABS,i;
+  for(i=0;i<t.length;i++){
+    $("tab_"+t[i].id).className=(t[i].id===id)?"on":"";
+    $("panel_"+t[i].id).className="panel"+(t[i].id===id?" on":"");
+  }
+}
+
+// ---- 설정 폼 채우기/수집 ----
+function fillForm(cfg){
+  for(var sec in SCHEMA){
+    var fields=SCHEMA[sec],src=(cfg&&cfg[sec])?cfg[sec]:{},def=DEFAULTS[sec]||{};
+    for(var key in fields){
+      var type=fields[key],el=$(fid(sec,key));if(!el)continue;
+      var v=(src[key]!==undefined&&src[key]!==null)?src[key]:def[key];
+      if(type==="bool")el.checked=!!v; else el.value=(v===undefined||v===null)?"":v;
+    }
+  }
+}
+function collectForm(){
+  var out={};
+  for(var sec in SCHEMA){
+    out[sec]={};var fields=SCHEMA[sec];
+    for(var key in fields){
+      var type=fields[key],el=$(fid(sec,key));
+      if(type==="bool")out[sec][key]=el.checked;
+      else if(type==="text")out[sec][key]=el.value;
+      else{var n=(type==="float")?parseFloat(el.value):parseInt(el.value,10);out[sec][key]=isNaN(n)?0:n;}
+    }
+  }
+  return out;
+}
+
+// ---- 방장 탭 ----
+function roleOf(hash){ if(arrHas(state.superAdmins,hash))return "super"; if(arrHas(state.admins,hash))return "admin"; return "user"; }
+function setRole(hash,role){
+  arrDel(state.superAdmins,hash); arrDel(state.admins,hash);
+  if(role==="super")arrAdd(state.superAdmins,hash);
+  else if(role==="admin")arrAdd(state.admins,hash);
+  renderSuper();
+}
+function renderSuper(){
+  var box=$("superList"); if(!box)return;
+  var f=($("superFilter")&&$("superFilter").value||"").trim();
+  var html="",hashes=[],h;
+  for(h in roster.users)if(roster.users.hasOwnProperty(h))hashes.push(h);
+  hashes.sort(function(a,b){return (roster.users[a]||"").localeCompare(roster.users[b]||"");});
+  var shown=0;
+  for(var i=0;i<hashes.length;i++){
+    h=hashes[i];var nick=roster.users[h]||h;
+    if(f&&nick.indexOf(f)===-1)continue;
+    shown++;var role=roleOf(h);
+    var badge=role==="super"?'<span class="badge b-super">방장</span>':role==="admin"?'<span class="badge b-admin">관리자</span>':'';
+    html+='<div class="uitem"><div class="uname">'+esc(nick)+badge+'</div><div class="roles">'+
+      '<button class="'+(role==="super"?"on super":"")+'" onclick="setRole(\''+h+'\',\'super\')">방장</button>'+
+      '<button class="'+(role==="admin"?"on":"")+'" onclick="setRole(\''+h+'\',\'admin\')">관리자</button>'+
+      '<button class="'+(role==="user"?"on":"")+'" onclick="setRole(\''+h+'\',\'user\')">일반</button>'+
+      '</div></div>';
+  }
+  if(!shown)html='<div class="muted">'+(Object.keys(roster.users).length?"검색 결과 없음":"유저 목록이 비어있습니다. 봇이 켜져 roster를 올렸는지 확인하세요.")+'</div>';
+  box.innerHTML=html;
+}
+
+// ---- 차단 탭 ----
+function toggleBlock(key,on){ if(on)arrAdd(state.blockedRooms,key); else arrDel(state.blockedRooms,key); }
+function renderBlock(){
+  var box=$("blockList"); if(!box)return;
+  var keys=[],seen={},k;
+  for(k in roster.rooms)if(roster.rooms.hasOwnProperty(k)){keys.push(k);seen[k]=1;}
+  for(var i=0;i<state.blockedRooms.length;i++)if(!seen[state.blockedRooms[i]])keys.push(state.blockedRooms[i]);
+  if(!keys.length){box.innerHTML='<div class="muted">알려진 방이 없습니다. 봇이 메시지를 한 번 받은 방만 표시됩니다.</div>';return;}
+  var html="";
+  for(i=0;i<keys.length;i++){
+    k=keys[i];var name=roster.rooms[k]||k,on=arrHas(state.blockedRooms,k);
+    html+='<div class="uitem"><div class="uname">'+esc(name)+(on?'<span class="badge b-admin">차단됨</span>':'')+'</div>'+
+      '<input type="checkbox" '+(on?"checked":"")+' onchange="toggleBlock(\''+jsq(k)+'\',this.checked)"></div>';
+  }
+  box.innerHTML=html;
+}
+// ---- 유저 차단(밴) ----
+function toggleBan(hash,on){ if(on)arrAdd(state.banned,hash); else arrDel(state.banned,hash); renderBan(); }
+function renderBan(){
+  var box=$("banList"); if(!box)return;
+  var f=($("banFilter")&&$("banFilter").value||"").trim();
+  var hashes=[],h; for(h in roster.users)if(roster.users.hasOwnProperty(h))hashes.push(h);
+  hashes.sort(function(a,b){return (roster.users[a]||"").localeCompare(roster.users[b]||"");});
+  var html="",shown=0;
+  for(var i=0;i<hashes.length;i++){
+    h=hashes[i];var nick=roster.users[h]||h;
+    if(f&&nick.indexOf(f)===-1)continue;
+    shown++;var on=arrHas(state.banned,h);
+    html+='<div class="uitem"><div class="uname">'+esc(nick)+(on?'<span class="badge b-ban">차단됨</span>':'')+'</div>'+
+      '<input type="checkbox" '+(on?"checked":"")+' onchange="toggleBan(\''+h+'\',this.checked)"></div>';
+  }
+  if(!shown)html='<div class="muted">'+(Object.keys(roster.users).length?"검색 결과 없음":"유저 목록이 비어있습니다.")+'</div>';
+  box.innerHTML=html;
+}
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+function jsq(s){return String(s).replace(/\\/g,"\\\\").replace(/'/g,"\\'");}
+
+// ---- Firebase ----
+function ep(sub){
+  var url=$("fbUrl").value.trim().replace(/\/+$/,""),auth=$("fbAuth").value.trim();
+  if(!url){setStatus("RTDB URL을 입력하세요.",true);return null;}
+  return url+sub+".json"+(auth?("?auth="+encodeURIComponent(auth)):"");
+}
+function setStatus(m,e){var s=$("status");s.textContent=m;s.style.color=e?"var(--err)":"var(--ok)";}
+function saveConn(){try{localStorage.setItem("fbConn",JSON.stringify({url:$("fbUrl").value,auth:$("fbAuth").value}));}catch(e){}}
+function loadConn(){try{var c=JSON.parse(localStorage.getItem("fbConn")||"{}");if(c.url)$("fbUrl").value=c.url;if(c.auth)$("fbAuth").value=c.auth;}catch(e){}}
+
+function loadAll(){
+  if(!ep("/botConfig"))return; saveConn(); setStatus("불러오는 중...",false);
+  Promise.all([
+    fetch(ep("/botConfig")).then(function(r){return r.json();}).catch(function(){return null;}),
+    fetch(ep("/roster")).then(function(r){return r.json();}).catch(function(){return null;})
+  ]).then(function(res){
+    fillForm(res[0]||{});
+    var ro=res[1]||{};
+    roster.users=ro.users||{}; roster.rooms=ro.rooms||{};
+    state.superAdmins=(ro.superAdmins||[]).slice();
+    state.admins=(ro.admins||[]).slice();
+    state.blockedRooms=(ro.blockedRooms||[]).slice();
+    state.banned=(ro.banned||[]).slice();
+    renderSuper(); renderBlock(); renderBan();
+    setStatus("✓ 불러왔습니다."+(res[1]?"":" (roster 없음 — 봇 실행 확인)"),false);
+  }).catch(function(e){setStatus("불러오기 실패: "+e,true);});
+}
+function saveAll(){
+  if(!ep("/botConfig"))return; saveConn(); setStatus("저장 중...",false);
+  var cfg=JSON.stringify(collectForm());
+  var adm=JSON.stringify({superAdmins:state.superAdmins,admins:state.admins,blockedRooms:state.blockedRooms,banned:state.banned});
+  Promise.all([
+    fetch(ep("/botConfig"),{method:"PUT",headers:{"Content-Type":"application/json"},body:cfg}),
+    fetch(ep("/adminState"),{method:"PUT",headers:{"Content-Type":"application/json"},body:adm})
+  ]).then(function(rs){
+    for(var i=0;i<rs.length;i++)if(!rs[i].ok)throw new Error("HTTP "+rs[i].status);
+    setStatus("✓ 저장 완료! 봇이 폴링 주기 안에 반영합니다.",false);
+  }).catch(function(e){setStatus("저장 실패: "+e,true);});
+}
+
+// ---- 비밀번호 잠금 ----
+var PASSWORD="admin123";
+function init(){
+  buildTabs();
+  fillForm({});
+  renderSuper(); renderBlock(); renderBan();
+  loadConn();
+  if($("fbUrl").value) loadAll();
+}
+function unlock(){
+  if($("pw").value===PASSWORD){ try{sessionStorage.setItem("ok","1");}catch(e){} $("gate").className="gate hidden"; init(); }
+  else { $("pwErr").textContent="비밀번호가 틀렸습니다."; $("pw").value=""; }
+}
+var _ok=false; try{_ok=sessionStorage.getItem("ok")==="1";}catch(e){}
+if(_ok){ $("gate").className="gate hidden"; init(); }
+else { setTimeout(function(){ var p=$("pw"); if(p)p.focus(); },100); }
+</script>
 </body>
 </html>
