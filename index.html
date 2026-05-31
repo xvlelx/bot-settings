@@ -82,7 +82,7 @@
 var SCHEMA = {
   "포인트설정":{CHAT_POINT:"int",CHAT_EXP:"int",ATTENDANCE_REWARD:"int",ATTENDANCE_EXP:"int",LEVELUP_REWARD:"int",GAMBLE_MIN:"int",GAMBLE_MAX_PERCENT:"int",CHAT_MIN_LEN:"int"},
   "럭키박스설정":{LUCKY_BOX_CHANCE:"float",LUCKY_BOX_MIN_POINTS:"int",LUCKY_BOX_MAX_POINTS:"int",LUCKY_BOX_MIN_EXP:"int",LUCKY_BOX_MAX_EXP:"int"},
-  "게임보상":{BASEBALL_REWARD:"int",WORD_REWARD:"int",TYPING_REWARD:"int",CHOSUNG_REWARD:"int",BALANCE_REWARD:"int",SUTDA_BONUS:"int",SUTDA_REFUND:"int",SUTDA_FEE:"int",LOTTO_PRICE:"int",LOTTO_FIRST_PRIZE:"int",LOTTO_SECOND_PRIZE:"int",LOTTO_THIRD_PRIZE:"int",RPS_FEE:"int",RPS_WIN:"int",RPS_DRAW:"int",RPS_DAILY_LIMIT:"int",RPS_SMART_BASE:"float",RPS_SMART_MAX:"float",BASEBALL_EXP:"int",WORD_EXP:"int",TYPING_EXP:"int",CHOSUNG_EXP:"int",BALANCE_EXP:"int"},
+  "게임보상":{BASEBALL_REWARD:"int",WORD_REWARD:"int",TYPING_REWARD:"int",CHOSUNG_REWARD:"int",BALANCE_REWARD:"int",SUTDA_BONUS:"int",SUTDA_REFUND:"int",SUTDA_FEE:"int",LOTTO_PRICE:"int",LOTTO_FIRST_PRIZE:"int",LOTTO_SECOND_PRIZE:"int",LOTTO_THIRD_PRIZE:"int",RPS_FEE:"int",RPS_WIN:"int",RPS_DRAW:"int",RPS_DAILY_LIMIT:"int",RPS_SMART_BASE:"float",RPS_SMART_MAX:"float",RPS_SMART_STEP:"float",BASEBALL_EXP:"int",WORD_EXP:"int",TYPING_EXP:"int",CHOSUNG_EXP:"int",BALANCE_EXP:"int"},
   "출석보너스":{DAY_7_BONUS:"int",DAY_14_BONUS:"int",DAY_21_BONUS:"int",DAY_28_BONUS:"int"},
   "시스템설정":{ATTENDANCE_START_HOUR:"int",JOIN_MESSAGE_ENABLED:"bool",LEAVE_MESSAGE_ENABLED:"bool"},
   "생일설정":{BIRTHDAY_BONUS_POINTS:"int",BIRTHDAY_BONUS_ENABLED:"bool",BIRTHDAY_AUTO_MESSAGE:"bool",BIRTHDAY_TITLE:"text"},
@@ -92,7 +92,7 @@ var SCHEMA = {
 var DEFAULTS = {
   "포인트설정":{CHAT_POINT:1,CHAT_EXP:1,ATTENDANCE_REWARD:100,ATTENDANCE_EXP:30,LEVELUP_REWARD:50,GAMBLE_MIN:1000,GAMBLE_MAX_PERCENT:100,CHAT_MIN_LEN:3},
   "럭키박스설정":{LUCKY_BOX_CHANCE:0.005,LUCKY_BOX_MIN_POINTS:50,LUCKY_BOX_MAX_POINTS:200,LUCKY_BOX_MIN_EXP:10,LUCKY_BOX_MAX_EXP:50},
-  "게임보상":{BASEBALL_REWARD:100,WORD_REWARD:50,TYPING_REWARD:80,CHOSUNG_REWARD:30,BALANCE_REWARD:100,SUTDA_BONUS:50,SUTDA_REFUND:75,SUTDA_FEE:100,LOTTO_PRICE:100,LOTTO_FIRST_PRIZE:1000,LOTTO_SECOND_PRIZE:500,LOTTO_THIRD_PRIZE:100,RPS_FEE:500,RPS_WIN:2000,RPS_DRAW:1000,RPS_DAILY_LIMIT:20,RPS_SMART_BASE:0.30,RPS_SMART_MAX:0.65,BASEBALL_EXP:30,WORD_EXP:20,TYPING_EXP:25,CHOSUNG_EXP:15,BALANCE_EXP:20},
+  "게임보상":{BASEBALL_REWARD:100,WORD_REWARD:50,TYPING_REWARD:80,CHOSUNG_REWARD:30,BALANCE_REWARD:100,SUTDA_BONUS:50,SUTDA_REFUND:75,SUTDA_FEE:100,LOTTO_PRICE:100,LOTTO_FIRST_PRIZE:1000,LOTTO_SECOND_PRIZE:500,LOTTO_THIRD_PRIZE:100,RPS_FEE:500,RPS_WIN:2000,RPS_DRAW:1000,RPS_DAILY_LIMIT:20,RPS_SMART_BASE:0.80,RPS_SMART_MAX:0.95,RPS_SMART_STEP:0.03,BASEBALL_EXP:30,WORD_EXP:20,TYPING_EXP:25,CHOSUNG_EXP:15,BALANCE_EXP:20},
   "출석보너스":{DAY_7_BONUS:50,DAY_14_BONUS:50,DAY_21_BONUS:50,DAY_28_BONUS:50},
   "시스템설정":{ATTENDANCE_START_HOUR:6,JOIN_MESSAGE_ENABLED:true,LEAVE_MESSAGE_ENABLED:false},
   "생일설정":{BIRTHDAY_BONUS_POINTS:2000,BIRTHDAY_BONUS_ENABLED:true,BIRTHDAY_AUTO_MESSAGE:true,BIRTHDAY_TITLE:"생일 주인공"},
@@ -102,7 +102,7 @@ var DEFAULTS = {
 var LABELS = {
   CHAT_POINT:"채팅 1회 포인트",CHAT_EXP:"채팅 1회 경험치",ATTENDANCE_REWARD:"출석 보상 포인트",ATTENDANCE_EXP:"출석 경험치",LEVELUP_REWARD:"레벨업 보상 포인트",GAMBLE_MIN:"도박 최소 베팅",GAMBLE_MAX_PERCENT:"도박 최대 변동률(%)",CHAT_MIN_LEN:"보상 최소 글자수",
   LUCKY_BOX_CHANCE:"럭키박스 확률 (0~1)",LUCKY_BOX_MIN_POINTS:"럭키박스 최소 포인트",LUCKY_BOX_MAX_POINTS:"럭키박스 최대 포인트",LUCKY_BOX_MIN_EXP:"럭키박스 최소 경험치",LUCKY_BOX_MAX_EXP:"럭키박스 최대 경험치",
-  BASEBALL_REWARD:"숫자야구 승리 포인트",WORD_REWARD:"끝말잇기 승리 포인트",TYPING_REWARD:"타자게임 승리 포인트",CHOSUNG_REWARD:"초성게임 정답 포인트",BALANCE_REWARD:"밸런스게임 보상 포인트",SUTDA_BONUS:"섯다 우승 보너스",SUTDA_REFUND:"섯다 무승부 환불(%)",SUTDA_FEE:"섯다 참가비",LOTTO_PRICE:"로또 1장 가격",LOTTO_FIRST_PRIZE:"로또 1등 상금",LOTTO_SECOND_PRIZE:"로또 2등 상금",LOTTO_THIRD_PRIZE:"로또 3등 상금",RPS_FEE:"가위바위보 참가비",RPS_WIN:"가위바위보 승리 포인트",RPS_DRAW:"가위바위보 무승부 포인트",RPS_DAILY_LIMIT:"가위바위보 하루 횟수",RPS_SMART_BASE:"가위바위보 봇 예측확률(기본,0~1)",RPS_SMART_MAX:"가위바위보 봇 예측확률(최대,0~1)",BASEBALL_EXP:"숫자야구 경험치",WORD_EXP:"끝말잇기 경험치",TYPING_EXP:"타자게임 경험치",CHOSUNG_EXP:"초성게임 경험치",BALANCE_EXP:"밸런스게임 경험치",
+  BASEBALL_REWARD:"숫자야구 승리 포인트",WORD_REWARD:"끝말잇기 승리 포인트",TYPING_REWARD:"타자게임 승리 포인트",CHOSUNG_REWARD:"초성게임 정답 포인트",BALANCE_REWARD:"밸런스게임 보상 포인트",SUTDA_BONUS:"섯다 우승 보너스",SUTDA_REFUND:"섯다 무승부 환불(%)",SUTDA_FEE:"섯다 참가비",LOTTO_PRICE:"로또 1장 가격",LOTTO_FIRST_PRIZE:"로또 1등 상금",LOTTO_SECOND_PRIZE:"로또 2등 상금",LOTTO_THIRD_PRIZE:"로또 3등 상금",RPS_FEE:"가위바위보 참가비",RPS_WIN:"가위바위보 승리 포인트",RPS_DRAW:"가위바위보 무승부 포인트",RPS_DAILY_LIMIT:"가위바위보 하루 횟수",RPS_SMART_BASE:"가위바위보 봇 예측확률(기본,0~1)",RPS_SMART_MAX:"가위바위보 봇 예측확률(최대,0~1)",RPS_SMART_STEP:"가위바위보 연승당 난이도 증가폭",BASEBALL_EXP:"숫자야구 경험치",WORD_EXP:"끝말잇기 경험치",TYPING_EXP:"타자게임 경험치",CHOSUNG_EXP:"초성게임 경험치",BALANCE_EXP:"밸런스게임 경험치",
   DAY_7_BONUS:"7일 연속 보너스",DAY_14_BONUS:"14일 연속 보너스",DAY_21_BONUS:"21일 연속 보너스",DAY_28_BONUS:"28일 연속 보너스",
   ATTENDANCE_START_HOUR:"출석 시작 시각 (시)",JOIN_MESSAGE_ENABLED:"입장 인사 메시지",LEAVE_MESSAGE_ENABLED:"퇴장 메시지",
   BIRTHDAY_BONUS_POINTS:"생일 축하 포인트",BIRTHDAY_BONUS_ENABLED:"생일 포인트 지급",BIRTHDAY_AUTO_MESSAGE:"생일 자동 축하 메시지",BIRTHDAY_TITLE:"생일 칭호 이름",
@@ -121,6 +121,7 @@ var TABS = [
 
 var roster = { users:{}, rooms:{} };
 var state = { superAdmins:[], admins:[], blockedRooms:[], banned:[] };
+var rosterLoaded = false;
 
 function $(id){return document.getElementById(id);}
 function fid(sec,key){return "f__"+sec+"__"+key;}
@@ -277,6 +278,7 @@ function loadAll(){
   ]).then(function(res){
     fillForm(res[0]||{});
     var ro=res[1]||{};
+    rosterLoaded=!!res[1];
     roster.users=ro.users||{}; roster.rooms=ro.rooms||{};
     state.superAdmins=(ro.superAdmins||[]).slice();
     state.admins=(ro.admins||[]).slice();
@@ -288,14 +290,14 @@ function loadAll(){
 }
 function saveAll(){
   if(!ep("/botConfig"))return; saveConn(); setStatus("저장 중...",false);
-  var cfg=JSON.stringify(collectForm());
-  var adm=JSON.stringify({superAdmins:state.superAdmins,admins:state.admins,blockedRooms:state.blockedRooms,banned:state.banned});
-  Promise.all([
-    fetch(ep("/botConfig"),{method:"PUT",headers:{"Content-Type":"application/json"},body:cfg}),
-    fetch(ep("/adminState"),{method:"PUT",headers:{"Content-Type":"application/json"},body:adm})
-  ]).then(function(rs){
+  var puts=[ fetch(ep("/botConfig"),{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(collectForm())}) ];
+  if(rosterLoaded){   // roster 못 불러왔으면 권한/차단을 덮어쓰지 않음(방장 잠금 방지)
+    var adm=JSON.stringify({superAdmins:state.superAdmins,admins:state.admins,blockedRooms:state.blockedRooms,banned:state.banned});
+    puts.push(fetch(ep("/adminState"),{method:"PUT",headers:{"Content-Type":"application/json"},body:adm}));
+  }
+  Promise.all(puts).then(function(rs){
     for(var i=0;i<rs.length;i++)if(!rs[i].ok)throw new Error("HTTP "+rs[i].status);
-    setStatus("✓ 저장 완료! 봇이 폴링 주기 안에 반영합니다.",false);
+    setStatus("✓ 저장 완료!"+(rosterLoaded?"":" (권한/차단은 roster 미로딩이라 건너뜀)")+" 봇이 곧 반영합니다.",false);
   }).catch(function(e){setStatus("저장 실패: "+e,true);});
 }
 
