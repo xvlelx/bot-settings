@@ -208,7 +208,7 @@ function panelHtml(t){
     '<button style="flex:1" onclick="giveCmd(\'addExp\')">✨ 경험치 지급</button></div>'+
     '<div class="muted" style="margin-top:8px">봇이 켜져 있어야 처리돼요(30초 내).</div></div>'+
     '<div class="card"><h2>시즌 초기화</h2>'+
-    '<div class="muted" style="margin-bottom:10px">전체 유저의 <b>포인트·레벨·경험치·칭호·가방·게임전적</b>을 0으로 리셋합니다.<br>(출석·채팅·신원·권한·생일은 유지)</div>'+
+    '<div class="muted" style="margin-bottom:10px">전체 유저의 <b>포인트·레벨·경험치·칭호·가방·게임전적·출석·채팅</b>을 초기화합니다.<br>(신원·권한·생일만 유지)</div>'+
     '<button style="width:100%;background:var(--err)" onclick="seasonResetCmd()">🗑 지금 시즌 초기화</button>'+
     '<div class="muted" style="margin-top:8px">매월 자동 초기화 = [🔧기능활성화] 탭의 "매월 자동 시즌 초기화" 켜기</div></div>';
   var h="";
@@ -349,7 +349,7 @@ function giveCmd(type){
   pushCmd({type:type,hash:sel.value,amount:amt}, "✓ "+nick+"님 "+(type==="addPoints"?"포인트":"경험치")+" "+amt+" 지급 요청");
 }
 function seasonResetCmd(){
-  if(!confirm("정말 시즌 초기화할까요?\n모든 유저의 포인트·레벨·칭호·전적이 0으로 리셋됩니다."))return;
+  if(!confirm("정말 시즌 초기화할까요?\n모든 유저의 포인트·레벨·칭호·전적·출석·채팅이 초기화됩니다."))return;
   pushCmd({type:"seasonReset"}, "✓ 시즌 초기화 요청");
 }
 
