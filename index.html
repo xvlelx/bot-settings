@@ -113,7 +113,7 @@ var SCHEMA = {
     TRANSFER_ENABLED:"bool", GAMBLE_ENABLED:"bool", SHOP_ENABLED:"bool", MENTION_ENABLED:"bool",
     GAME_BASEBALL_ENABLED:"bool", GAME_LOTTO_ENABLED:"bool", GAME_WORDCHAIN_ENABLED:"bool", GAME_CHOSUNG_ENABLED:"bool",
     GAME_TYPING_ENABLED:"bool", GAME_BALANCE_ENABLED:"bool", GAME_SUTDA_ENABLED:"bool", GAME_RPS_ENABLED:"bool",
-    PROFILE_DETECTION_ENABLED:"bool", INACTIVE_USER_TRACKING:"bool"
+    PROFILE_DETECTION_ENABLED:"bool", INACTIVE_USER_TRACKING:"bool", SEASON_AUTO_RESET:"bool"
   }
 };
 var DEFAULTS = {
@@ -150,7 +150,7 @@ var DEFAULTS = {
     TRANSFER_ENABLED:true, GAMBLE_ENABLED:true, SHOP_ENABLED:true, MENTION_ENABLED:true,
     GAME_BASEBALL_ENABLED:true, GAME_LOTTO_ENABLED:true, GAME_WORDCHAIN_ENABLED:true, GAME_CHOSUNG_ENABLED:true,
     GAME_TYPING_ENABLED:true, GAME_BALANCE_ENABLED:true, GAME_SUTDA_ENABLED:true, GAME_RPS_ENABLED:true,
-    PROFILE_DETECTION_ENABLED:true, INACTIVE_USER_TRACKING:true
+    PROFILE_DETECTION_ENABLED:true, INACTIVE_USER_TRACKING:true, SEASON_AUTO_RESET:false
   }
 };
 var LABELS = {
@@ -161,7 +161,7 @@ var LABELS = {
   ATTENDANCE_START_HOUR:"출석 시작 시각 (시)",JOIN_MESSAGE_ENABLED:"입장 인사 메시지",LEAVE_MESSAGE_ENABLED:"퇴장 메시지",
   BIRTHDAY_BONUS_POINTS:"생일 축하 포인트",BIRTHDAY_BONUS_ENABLED:"생일 포인트 지급",BIRTHDAY_AUTO_MESSAGE:"생일 자동 축하 메시지",BIRTHDAY_TITLE:"생일 칭호 이름",
   GROQ_API_KEY:"Groq API 키",GROQ_MODEL:"Groq 모델명",
-  POINT_SYSTEM_ENABLED:"포인트 시스템",LEVEL_SYSTEM_ENABLED:"레벨 시스템",CHAT_COUNT_ENABLED:"채팅수 집계",LUCKY_BOX_ENABLED:"럭키박스",TRANSFER_ENABLED:"포인트 이체",GAMBLE_ENABLED:"도박",SHOP_ENABLED:"상점",MENTION_ENABLED:"멘션 감지",GAME_BASEBALL_ENABLED:"숫자야구",GAME_LOTTO_ENABLED:"로또",GAME_WORDCHAIN_ENABLED:"끝말잇기",GAME_CHOSUNG_ENABLED:"초성게임",GAME_TYPING_ENABLED:"타자게임",GAME_BALANCE_ENABLED:"밸런스게임",GAME_SUTDA_ENABLED:"섯다",GAME_RPS_ENABLED:"가위바위보",PROFILE_DETECTION_ENABLED:"프로필(닉변) 감지",INACTIVE_USER_TRACKING:"비활성 유저 추적"
+  POINT_SYSTEM_ENABLED:"포인트 시스템",LEVEL_SYSTEM_ENABLED:"레벨 시스템",CHAT_COUNT_ENABLED:"채팅수 집계",LUCKY_BOX_ENABLED:"럭키박스",TRANSFER_ENABLED:"포인트 이체",GAMBLE_ENABLED:"도박",SHOP_ENABLED:"상점",MENTION_ENABLED:"멘션 감지",GAME_BASEBALL_ENABLED:"숫자야구",GAME_LOTTO_ENABLED:"로또",GAME_WORDCHAIN_ENABLED:"끝말잇기",GAME_CHOSUNG_ENABLED:"초성게임",GAME_TYPING_ENABLED:"타자게임",GAME_BALANCE_ENABLED:"밸런스게임",GAME_SUTDA_ENABLED:"섯다",GAME_RPS_ENABLED:"가위바위보",PROFILE_DETECTION_ENABLED:"프로필(닉변) 감지",INACTIVE_USER_TRACKING:"비활성 유저 추적",SEASON_AUTO_RESET:"매월 자동 시즌 초기화"
 };
 // 탭 → 섹션
 var TABS = [
@@ -170,7 +170,8 @@ var TABS = [
   {id:"game",  name:"🎮 게임", secs:["게임보상"]},
   {id:"feat",  name:"🔧 기능활성화", secs:["기능활성화"]},
   {id:"super", name:"👥 방장", custom:"super"},
-  {id:"block", name:"🚫 차단", custom:"block"}
+  {id:"block", name:"🚫 차단", custom:"block"},
+  {id:"manage",name:"🛠 관리", custom:"manage"}
 ];
 
 var roster = { users:{}, rooms:{} };
@@ -198,6 +199,18 @@ function panelHtml(t){
   if(t.custom==="block") return ''+
     '<div class="card"><h2 style="margin-top:0">유저 차단(밴)</h2><div class="muted" style="margin-bottom:8px">체크하면 그 유저가 봇 사용 불가가 됩니다.</div><input class="filter" id="banFilter" type="text" placeholder="닉네임 검색..." oninput="renderBan()"><div id="banList"></div></div>'+
     '<div class="card"><h2>방 차단</h2><div class="muted" style="margin-bottom:8px">체크하면 그 방에서 봇이 비활성화됩니다.</div><div id="blockList"></div></div>';
+  if(t.custom==="manage") return ''+
+    '<div class="card"><h2 style="margin-top:0">포인트 / 경험치 지급</h2>'+
+    '<div class="row"><label>대상 유저</label><select id="giveUser" style="width:170px"></select></div>'+
+    '<div class="row"><label>금액 (음수=차감)</label><input id="giveAmount" type="number" value="1000"></div>'+
+    '<div style="display:flex;gap:8px;margin-top:10px">'+
+    '<button style="flex:1" onclick="giveCmd(\'addPoints\')">💰 포인트 지급</button>'+
+    '<button style="flex:1" onclick="giveCmd(\'addExp\')">✨ 경험치 지급</button></div>'+
+    '<div class="muted" style="margin-top:8px">봇이 켜져 있어야 처리돼요(30초 내).</div></div>'+
+    '<div class="card"><h2>시즌 초기화</h2>'+
+    '<div class="muted" style="margin-bottom:10px">전체 유저의 <b>포인트·레벨·경험치·칭호·가방·게임전적</b>을 0으로 리셋합니다.<br>(출석·채팅·신원·권한·생일은 유지)</div>'+
+    '<button style="width:100%;background:var(--err)" onclick="seasonResetCmd()">🗑 지금 시즌 초기화</button>'+
+    '<div class="muted" style="margin-top:8px">매월 자동 초기화 = [🔧기능활성화] 탭의 "매월 자동 시즌 초기화" 켜기</div></div>';
   var h="";
   for(var s=0;s<t.secs.length;s++){
     var sec=t.secs[s], fields=SCHEMA[sec]; if(!fields)continue;
@@ -314,6 +327,32 @@ function renderBan(){
 function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
 function jsq(s){return String(s).replace(/\\/g,"\\\\").replace(/'/g,"\\'");}
 
+// ---- 관리 탭 (포인트/경험치 지급, 시즌 초기화) ----
+function fillGiveUsers(){
+  var sel=$("giveUser"); if(!sel)return;
+  var hashes=[],h; for(h in roster.users)if(roster.users.hasOwnProperty(h))hashes.push(h);
+  hashes.sort(function(a,b){return (roster.users[a]||"").localeCompare(roster.users[b]||"");});
+  var html=""; for(var i=0;i<hashes.length;i++)html+='<option value="'+hashes[i]+'">'+esc(roster.users[hashes[i]]||hashes[i])+'</option>';
+  sel.innerHTML=html||'<option value="">(유저 없음 — 봇 실행 확인)</option>';
+}
+function pushCmd(cmd,okMsg){
+  var u=ep("/commands"); if(!u)return; saveConn(); setStatus("전송 중...",false);
+  fetch(u,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(cmd)})
+    .then(function(r){if(!r.ok)throw new Error("HTTP "+r.status);return r.json();})
+    .then(function(){setStatus(okMsg+" — 봇이 곧 처리해요.",false);})
+    .catch(function(e){setStatus("실패: "+e,true);});
+}
+function giveCmd(type){
+  var sel=$("giveUser"); if(!sel||!sel.value){setStatus("대상 유저를 선택하세요.",true);return;}
+  var amt=parseInt($("giveAmount").value,10); if(isNaN(amt)||amt===0){setStatus("금액(0 아님)을 입력하세요.",true);return;}
+  var nick=roster.users[sel.value]||sel.value;
+  pushCmd({type:type,hash:sel.value,amount:amt}, "✓ "+nick+"님 "+(type==="addPoints"?"포인트":"경험치")+" "+amt+" 지급 요청");
+}
+function seasonResetCmd(){
+  if(!confirm("정말 시즌 초기화할까요?\n모든 유저의 포인트·레벨·칭호·전적이 0으로 리셋됩니다."))return;
+  pushCmd({type:"seasonReset"}, "✓ 시즌 초기화 요청");
+}
+
 // ---- Firebase ----
 function ep(sub){
   var url=$("fbUrl").value.trim().replace(/\/+$/,""),auth=$("fbAuth").value.trim();
@@ -338,7 +377,7 @@ function loadAll(){
     state.admins=(ro.admins||[]).slice();
     state.blockedRooms=(ro.blockedRooms||[]).slice();
     state.banned=(ro.banned||[]).slice();
-    renderSuper(); renderBlock(); renderBan();
+    renderSuper(); renderBlock(); renderBan(); fillGiveUsers();
     setStatus("✓ 불러왔습니다."+(res[1]?"":" (roster 없음 — 봇 실행 확인)"),false);
   }).catch(function(e){setStatus("불러오기 실패: "+e,true);});
 }
@@ -360,7 +399,7 @@ var PASSWORD="admin123";
 function init(){
   buildTabs();
   fillForm({});
-  renderSuper(); renderBlock(); renderBan();
+  renderSuper(); renderBlock(); renderBan(); fillGiveUsers();
   loadConn();
   if($("fbUrl").value) loadAll();
 }
