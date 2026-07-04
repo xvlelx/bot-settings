@@ -163,7 +163,7 @@ var LABELS = {
   ATTENDANCE_START_HOUR:"출석 시작 시각 (시)",JOIN_MESSAGE_ENABLED:"입장 인사 메시지",LEAVE_MESSAGE_ENABLED:"퇴장 메시지",
   BIRTHDAY_BONUS_POINTS:"생일 축하 포인트",BIRTHDAY_BONUS_ENABLED:"생일 포인트 지급",BIRTHDAY_AUTO_MESSAGE:"생일 자동 축하 메시지",BIRTHDAY_TITLE:"생일 칭호 이름",
   GROQ_API_KEY:"Groq API 키",GROQ_MODEL:"Groq 모델명",
-  POINT_SYSTEM_ENABLED:"포인트 시스템",LEVEL_SYSTEM_ENABLED:"레벨 시스템",CHAT_COUNT_ENABLED:"채팅수 집계",LUCKY_BOX_ENABLED:"럭키박스",TRANSFER_ENABLED:"포인트 이체",GAMBLE_ENABLED:"도박",SHOP_ENABLED:"상점",MENTION_ENABLED:"멘션 감지",GAME_BASEBALL_ENABLED:"숫자야구",GAME_LOTTO_ENABLED:"로또",GAME_WORDCHAIN_ENABLED:"끝말잇기",GAME_CHOSUNG_ENABLED:"초성게임",GAME_TYPING_ENABLED:"타자게임",GAME_BALANCE_ENABLED:"밸런스게임",GAME_SUTDA_ENABLED:"섯다",GAME_RPS_ENABLED:"가위바위보",PROFILE_DETECTION_ENABLED:"프로필(닉변) 감지",INACTIVE_USER_TRACKING:"비활성 유저 추적",SEASON_AUTO_RESET:"매월 자동 시즌 초기화",AI_ENABLED:"AI 기능(타로·질문·요약·성격분석·빙의)",MENTION_ALERT_ENABLED:"멘션 자동 알림",ANON_ENABLED:"대나무숲(익명)"
+  POINT_SYSTEM_ENABLED:"포인트 시스템",LEVEL_SYSTEM_ENABLED:"레벨 시스템",CHAT_COUNT_ENABLED:"채팅수 집계",LUCKY_BOX_ENABLED:"럭키박스",TRANSFER_ENABLED:"포인트 이체",GAMBLE_ENABLED:"도박",SHOP_ENABLED:"상점",MENTION_ENABLED:"멘션 감지",GAME_BASEBALL_ENABLED:"숫자야구",GAME_LOTTO_ENABLED:"로또",GAME_WORDCHAIN_ENABLED:"끝말잇기",GAME_CHOSUNG_ENABLED:"초성게임",GAME_TYPING_ENABLED:"타자게임",GAME_BALANCE_ENABLED:"밸런스게임",GAME_SUTDA_ENABLED:"섯다",GAME_RPS_ENABLED:"가위바위보",PROFILE_DETECTION_ENABLED:"프로필(닉변) 감지",INACTIVE_USER_TRACKING:"비활성 유저 추적",SEASON_AUTO_RESET:"매월 1일 자동 초기화",AI_ENABLED:"AI 기능(타로·질문·요약·성격분석·빙의)",MENTION_ALERT_ENABLED:"멘션 자동 알림",ANON_ENABLED:"대나무숲(익명)"
 };
 // 탭 → 섹션
 var TABS = [
@@ -209,10 +209,10 @@ function panelHtml(t){
     '<button style="flex:1" onclick="giveCmd(\'addPoints\')">💰 포인트 지급</button>'+
     '<button style="flex:1" onclick="giveCmd(\'addExp\')">✨ 경험치 지급</button></div>'+
     '<div class="muted" style="margin-top:8px">봇이 켜져 있어야 처리돼요(30초 내).</div></div>'+
-    '<div class="card"><h2>시즌 초기화</h2>'+
+    '<div class="card"><h2>월간 초기화</h2>'+
     '<div class="muted" style="margin-bottom:10px">전체 유저의 <b>포인트·레벨·경험치·칭호·가방·게임전적·출석·채팅</b>을 초기화합니다.<br>(신원·권한·생일만 유지)</div>'+
-    '<button style="width:100%;background:var(--err)" onclick="seasonResetCmd()">🗑 지금 시즌 초기화</button>'+
-    '<div class="muted" style="margin-top:8px">매월 자동 초기화 = [🔧기능활성화] 탭의 "매월 자동 시즌 초기화" 켜기</div></div>';
+    '<button style="width:100%;background:var(--err)" onclick="seasonResetCmd()">🗑 지금 월간 초기화</button>'+
+    '<div class="muted" style="margin-top:8px">매월 자동 초기화 = [🔧기능활성화] 탭의 "매월 1일 자동 초기화" 켜기</div></div>';
   var h="";
   for(var s=0;s<t.secs.length;s++){
     var sec=t.secs[s], fields=SCHEMA[sec]; if(!fields)continue;
@@ -329,7 +329,7 @@ function renderBan(){
 function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
 function jsq(s){return String(s).replace(/\\/g,"\\\\").replace(/'/g,"\\'");}
 
-// ---- 관리 탭 (포인트/경험치 지급, 시즌 초기화) ----
+// ---- 관리 탭 (포인트/경험치 지급, 월간 초기화) ----
 function fillGiveUsers(){
   var sel=$("giveUser"); if(!sel)return;
   var hashes=[],h; for(h in roster.users)if(roster.users.hasOwnProperty(h))hashes.push(h);
@@ -351,8 +351,8 @@ function giveCmd(type){
   pushCmd({type:type,hash:sel.value,amount:amt}, "✓ "+nick+"님 "+(type==="addPoints"?"포인트":"경험치")+" "+amt+" 지급 요청");
 }
 function seasonResetCmd(){
-  if(!confirm("정말 시즌 초기화할까요?\n모든 유저의 포인트·레벨·칭호·전적·출석·채팅이 초기화됩니다."))return;
-  pushCmd({type:"seasonReset"}, "✓ 시즌 초기화 요청");
+  if(!confirm("정말 월간 초기화할까요?\n모든 유저의 포인트·레벨·칭호·전적·출석·채팅이 초기화됩니다."))return;
+  pushCmd({type:"seasonReset"}, "✓ 월간 초기화 요청");
 }
 
 // ---- Firebase ----
