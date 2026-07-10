@@ -19,8 +19,17 @@
   input[type=number],input[type=text],input[type=password]{background:#11141a;border:1px solid var(--line);color:var(--txt);border-radius:8px;padding:8px 10px;width:150px;font-size:13px;}
   input.wide{width:100%;}
   input[type=checkbox]{width:20px;height:20px;}
+  input:disabled{opacity:.45;}
+  select{background:#11141a;border:1px solid var(--line);color:var(--txt);border-radius:8px;padding:8px 10px;font-size:13px;}
   button{background:var(--accent);color:#fff;border:0;border-radius:8px;padding:11px 16px;font-size:14px;font-weight:600;cursor:pointer;}
   button.sec{background:#2a2f3a;}
+  button:disabled{cursor:not-allowed;}
+  /* 방 선택 바 */
+  .rb2{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-top:10px;}
+  .rb2 button{padding:8px 12px;font-size:12px;}
+  .mark{font-size:11px;margin-left:5px;}
+  .grp{font-size:12px;color:var(--accent);font-weight:700;margin:14px 0 2px;padding-bottom:4px;border-bottom:1px solid var(--line);}
+  .grp:first-child{margin-top:0;}
   /* 탭 */
   .tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;margin-bottom:6px;-webkit-overflow-scrolling:touch;}
   .tabs button{background:#161922;border:1px solid var(--line);color:var(--muted);padding:9px 12px;border-radius:10px;font-size:13px;white-space:nowrap;font-weight:600;}
@@ -53,9 +62,10 @@
 <body>
 <div id="gate" class="gate">
   <div class="gatebox">
-    <h2>🔒 비밀번호</h2>
-    <input id="pw" type="password" placeholder="비밀번호" onkeydown="if(event.key==='Enter')unlock()">
-    <button onclick="unlock()" style="width:100%;margin-top:10px">입장</button>
+    <h2>🔒 로그인</h2>
+    <input id="email" type="email" placeholder="이메일" onkeydown="if(event.key==='Enter')$('pw').focus()">
+    <input id="pw" type="password" placeholder="비밀번호" style="margin-top:8px" onkeydown="if(event.key==='Enter')unlock()">
+    <button id="loginBtn" onclick="unlock()" style="width:100%;margin-top:10px">입장</button>
     <div id="pwErr" class="muted" style="color:var(--err);margin-top:8px;min-height:16px"></div>
   </div>
 </div>
@@ -64,7 +74,19 @@
 
 <div class="card conn">
   <div class="row"><label>RTDB URL</label><input id="fbUrl" type="text" value="https://kakaobot-1df67-default-rtdb.asia-southeast1.firebasedatabase.app"></div>
-  <div class="row"><label>비밀키/토큰 <span class="muted">(공개 규칙이면 비움)</span></label><input id="fbAuth" type="password" placeholder="비워두세요"></div>
+  <div class="row" style="border:0"><label>계정<span class="key" id="whoami"></span></label><button class="sec" onclick="signOut()" style="padding:8px 12px;font-size:12px">로그아웃</button></div>
+</div>
+
+<div class="card">
+  <div class="row" style="border:0">
+    <label>방 선택<span class="key">이 드롭다운이 페이지 전체의 방 범위를 정합니다</span></label>
+    <select id="roomSel" onchange="onRoomChange()" style="width:170px"></select>
+  </div>
+  <div class="rb2">
+    <span id="pinBadge" class="muted"></span>
+    <button id="followBtn" class="sec hidden" onclick="followGlobal()">🌐 전역 따르기</button>
+  </div>
+  <div id="roomHint" class="muted"></div>
 </div>
 
 <div class="tabs" id="tabs"></div>
@@ -73,7 +95,7 @@
 
 <div class="bar">
   <button class="sec" onclick="loadAll()">⬇ 불러오기</button>
-  <button onclick="saveAll()">💾 저장</button>
+  <button id="saveBtn" onclick="saveAll()">💾 저장</button>
 </div>
 <div id="status"></div>
 
@@ -176,15 +198,92 @@ var TABS = [
   {id:"manage",name:"🛠 관리", custom:"manage"}
 ];
 
-var roster = { users:{}, rooms:{} };
+// 방별로 갈리면 안 되는 것. db.js 의 GLOBAL_SECTIONS 를 미러한다 — 여기 없는 건 방 오버라이드에 넣어봐야 db.cfg 가 무시한다.
+var GLOBAL_SECS = { "타로설정":1 };
+// 방별 섹션 안에 섞여 있는 전역 키. anon.js 는 1:1이라 방을 몰라 무인자 db.cfg() 로 읽는다 (전역 킬스위치)
+var GLOBAL_KEYS = { ANON_ENABLED:1 };
+var GLOBAL_SEL = "__global__";
+
+var roster = { users:{}, rooms:{}, userRooms:{}, registered:[] };
 var state = { superAdmins:[], admins:[], blockedRooms:[], banned:[] };
 var rosterLoaded = false;
+var globalCfg = {}, roomCfgs = {};   // roomCfgs[방키] = 오버라이드 객체 or null(전역 따름)
+var sel = GLOBAL_SEL;                // 현재 방 범위
 
 function $(id){return document.getElementById(id);}
 function fid(sec,key){return "f__"+sec+"__"+key;}
 function arrHas(a,v){return a.indexOf(v)!==-1;}
 function arrDel(a,v){var i=a.indexOf(v);if(i!==-1)a.splice(i,1);}
 function arrAdd(a,v){if(a.indexOf(v)===-1)a.push(v);}
+
+// ===== 순수 로직 (봇 db.js 와 계약을 맞춰야 하는 부분) =====
+// db.js:deepMerge 미러
+function webDeepMerge(base, over) {
+  var out = {}, k;
+  for (k in base) if (base.hasOwnProperty(k)) {
+    if (base[k] && typeof base[k] === "object" && !(base[k] instanceof Array)) out[k] = webDeepMerge(base[k], (over && over[k]) || {});
+    else out[k] = (over && over.hasOwnProperty(k)) ? over[k] : base[k];
+  }
+  if (over) for (k in over) if (over.hasOwnProperty(k) && !out.hasOwnProperty(k)) out[k] = over[k];
+  return out;
+}
+// db.js:cfg(rkey) 미러 — 방이 실제로 보게 될 값. 폼에 이걸 채워야 "전역 추종"이 눈에 보인다
+function effectiveCfg(global, override) {
+  if (!override) return global;
+  var m = webDeepMerge(global, override), s;
+  for (s in GLOBAL_SECS) if (GLOBAL_SECS.hasOwnProperty(s)) m[s] = global[s];
+  return m;
+}
+// 방 저장 = 바꾼 키만 고정. 전역과 같은 값은 올리지 않아 그 키는 계속 전역을 따라간다.
+// 전부 같으면 null → 호출부가 노드를 지운다 (빈 오버라이드를 만들면 웹이 '고정됨'으로 오해)
+function diffPin(global, form) {
+  var out = {}, has = false, sec, key, g, f, secOut, secHas;
+  for (sec in form) if (form.hasOwnProperty(sec)) {
+    if (GLOBAL_SECS[sec]) continue;
+    g = global[sec] || {}; f = form[sec]; secOut = {}; secHas = false;
+    for (key in f) if (f.hasOwnProperty(key)) {
+      if (GLOBAL_KEYS[key]) continue;
+      if (g[key] !== f[key]) { secOut[key] = f[key]; secHas = true; }
+    }
+    if (secHas) { out[sec] = secOut; has = true; }
+  }
+  return has ? out : null;
+}
+function pinCount(o) { var n = 0, s, k; for (s in o) if (o.hasOwnProperty(s)) for (k in o[s]) if (o[s].hasOwnProperty(k)) n++; return n; }
+function roomLabel(ro, key) {
+  var reg = ro.registered || [], i;
+  for (i = 0; i < reg.length; i++) if (reg[i].key === key) return reg[i].n + "방 " + reg[i].name;
+  return (ro.rooms && ro.rooms[key]) || key;   // 미등록 방은 봇이 본 이름으로, 그것도 없으면 키
+}
+function roomOptions(registered) {
+  var out = [{ v: GLOBAL_SEL, label: "🌐 전역" }], i;
+  registered = registered || [];
+  for (i = 0; i < registered.length; i++) out.push({ v: registered[i].key, label: registered[i].n + "방 " + registered[i].name });
+  return out;
+}
+// 드롭다운 범위의 유저. 전역이면 방별 그룹(+미분류), 방이면 그 방 사람만.
+// hash 가 방마다 달라 한 사람이 여러 그룹에 나올 수 있다 — 그게 정상이다.
+function usersInScope(ro, scope) {
+  var reg = ro.registered || [], urooms = ro.userRooms || {}, us = ro.users || {};
+  var byKey = {}, order = [], out = [], i, h, k;
+  function grp(key, name) {
+    if (!byKey[key]) { byKey[key] = { key: key, name: name, hashes: [] }; order.push(key); }
+    return byKey[key];
+  }
+  if (scope !== GLOBAL_SEL) {
+    var g = grp(scope, roomLabel(ro, scope));
+    for (h in us) if (us.hasOwnProperty(h) && urooms[h] === scope) g.hashes.push(h);
+    return g.hashes.length ? [g] : [];
+  }
+  for (i = 0; i < reg.length; i++) grp(reg[i].key, reg[i].n + "방 " + reg[i].name);   // 방 번호순 먼저 자리를 잡아둔다
+  for (h in us) if (us.hasOwnProperty(h)) {
+    k = urooms[h] || "__none__";                                                       // roomKey 없는 옛 레코드
+    grp(k, k === "__none__" ? "미분류" : roomLabel(ro, k)).hashes.push(h);
+  }
+  for (i = 0; i < order.length; i++) if (byKey[order[i]].hashes.length) out.push(byKey[order[i]]);
+  out.sort(function (a, b) { return (a.key === "__none__" ? 1 : 0) - (b.key === "__none__" ? 1 : 0); });
+  return out;
+}
 
 // ---- 탭/폼 빌드 ----
 function buildTabs(){
@@ -210,16 +309,17 @@ function panelHtml(t){
     '<button style="flex:1" onclick="giveCmd(\'addExp\')">✨ 경험치 지급</button></div>'+
     '<div class="muted" style="margin-top:8px">봇이 켜져 있어야 처리돼요(30초 내).</div></div>'+
     '<div class="card"><h2>월간 초기화</h2>'+
-    '<div class="muted" style="margin-bottom:10px">전체 유저의 <b>포인트·레벨·경험치·칭호·가방·게임전적·출석·채팅</b>을 초기화합니다.<br>(신원·권한·생일만 유지)</div>'+
-    '<button style="width:100%;background:var(--err)" onclick="seasonResetCmd()">🗑 지금 월간 초기화</button>'+
-    '<div class="muted" style="margin-top:8px">매월 자동 초기화 = [🔧기능활성화] 탭의 "매월 1일 자동 초기화" 켜기</div></div>';
+    '<div class="muted" style="margin-bottom:10px">선택한 방 유저의 <b>포인트·레벨·경험치·칭호·가방·게임전적·출석·채팅</b>을 초기화합니다.<br>(신원·권한·생일만 유지)</div>'+
+    '<button id="srBtn" style="width:100%;background:var(--err)" onclick="seasonResetCmd()">🗑 지금 월간 초기화</button>'+
+    '<div id="srNote" class="muted" style="margin-top:8px"></div>'+
+    '<div class="muted" style="margin-top:6px">매월 자동 초기화 = [🔧기능활성화] 탭의 "매월 1일 자동 초기화" 켜기</div></div>';
   var h="";
   for(var s=0;s<t.secs.length;s++){
     var sec=t.secs[s], fields=SCHEMA[sec]; if(!fields)continue;
-    h+='<div class="card"><h2>'+sec+'</h2>';
+    h+='<div class="card" id="sec__'+sec+'"><h2>'+sec+'</h2>';
     for(var key in fields){
       var type=fields[key],id=fid(sec,key),ko=LABELS[key]||key;
-      h+='<div class="row"><label>'+ko+'<span class="key">'+key+'</span></label>';
+      h+='<div class="row"><label>'+ko+'<span class="mark" id="mk__'+sec+'__'+key+'"></span><span class="key">'+key+'</span></label>';
       if(type==="bool")h+='<input type="checkbox" id="'+id+'">';
       else if(type==="text")h+='<input type="text" class="wide" id="'+id+'">';
       else h+='<input type="number" id="'+id+'" step="'+(type==="float"?"any":"1")+'">';
@@ -235,6 +335,48 @@ function showTab(id){
     $("tab_"+t[i].id).className=(t[i].id===id)?"on":"";
     $("panel_"+t[i].id).className="panel"+(t[i].id===id?" on":"");
   }
+}
+
+// ---- 방 선택 바 ----
+function selExists(v){ if(v===GLOBAL_SEL)return true; var r=roster.registered||[],i; for(i=0;i<r.length;i++)if(r[i].key===v)return true; return false; }
+function buildRoomBar(){
+  var opts=roomOptions(roster.registered),h="",i;
+  for(i=0;i<opts.length;i++)h+='<option value="'+esc(opts[i].v)+'">'+esc(opts[i].label)+'</option>';
+  if(!selExists(sel))sel=GLOBAL_SEL;   // 방이 해제됐으면 전역으로 물러난다
+  $("roomSel").innerHTML=h; $("roomSel").value=sel;
+  $("roomHint").textContent=(roster.registered&&roster.registered.length)?"":"등록된 방이 없습니다. 봇에서 .방등록 후 [불러오기]를 다시 누르세요.";
+}
+function onRoomChange(){
+  sel=$("roomSel").value;
+  fillForm(sel===GLOBAL_SEL?globalCfg:effectiveCfg(globalCfg,roomCfgs[sel]));
+  applyScopeUI();
+}
+// 폼·뱃지·버튼·유저목록을 현재 방 범위에 맞춘다
+function applyScopeUI(){
+  var isG=(sel===GLOBAL_SEL), ov=isG?null:(roomCfgs[sel]||null), sec,key,el,mk,card,globalOnly;
+  for(sec in SCHEMA)if(SCHEMA.hasOwnProperty(sec)){
+    card=$("sec__"+sec);
+    if(card)card.className="card"+((!isG&&GLOBAL_SECS[sec])?" hidden":"");
+    for(key in SCHEMA[sec]){
+      el=$(fid(sec,key)); mk=$("mk__"+sec+"__"+key); if(!el||!mk)continue;
+      globalOnly=(!isG&&GLOBAL_KEYS[key]);
+      el.disabled=globalOnly;
+      if(globalOnly){ mk.textContent="🌐"; mk.title="전역에서만 설정합니다"; }
+      else if(!isG&&ov&&ov[sec]&&ov[sec].hasOwnProperty(key)){ mk.textContent="📌"; mk.title="이 방에 고정된 값"; }
+      else { mk.textContent=""; mk.title=""; }
+    }
+  }
+  $("followBtn").className=isG?"sec hidden":"sec";
+  var n=ov?pinCount(ov):0;
+  $("pinBadge").textContent=isG?"전역 기본값을 편집합니다":(n?("📌 이 방에 고정된 키 "+n+"개"):"🌐 전역을 따르는 중");
+  $("saveBtn").textContent=isG?"💾 전역 저장":("💾 "+roomLabel(roster,sel)+"에 저장");
+  var btn=$("srBtn"),note=$("srNote");
+  if(btn){
+    var many=isG&&(roster.registered||[]).length>1;   // 봇이 거부하는 조건과 동일 (firebaseSync.execCmd)
+    btn.disabled=many; btn.style.opacity=many?"0.5":"1";
+    note.textContent=many?"⚠️ 방이 여러 개입니다. 위에서 방을 선택하세요 (봇이 거부합니다).":(isG?"대상: 전체":("대상: "+roomLabel(roster,sel)));
+  }
+  renderSuper(); renderBan(); fillGiveUsers();
 }
 
 // ---- 설정 폼 채우기/수집 ----
@@ -270,26 +412,30 @@ function setRole(hash,role){
   else if(role==="admin")arrAdd(state.admins,hash);
   renderSuper();
 }
+// 그룹 헤더는 전역에서만. 방을 고르면 그 방 사람만 나오니 헤더가 군더더기다
+function grpHead(g){ return (sel===GLOBAL_SEL)?'<div class="grp">'+esc(g.name)+'</div>':''; }
+function sortedHashes(g){ return g.hashes.slice().sort(function(a,b){return (roster.users[a]||"").localeCompare(roster.users[b]||"");}); }
+function emptyMsg(){ return '<div class="muted">'+(Object.keys(roster.users).length?"해당 범위에 표시할 유저가 없습니다.":"유저 목록이 비어있습니다. 봇이 켜져 roster를 올렸는지 확인하세요.")+'</div>'; }
 function renderSuper(){
   var box=$("superList"); if(!box)return;
   var f=($("superFilter")&&$("superFilter").value||"").trim();
-  var html="",hashes=[],h;
-  for(h in roster.users)if(roster.users.hasOwnProperty(h))hashes.push(h);
-  hashes.sort(function(a,b){return (roster.users[a]||"").localeCompare(roster.users[b]||"");});
-  var shown=0;
-  for(var i=0;i<hashes.length;i++){
-    h=hashes[i];var nick=roster.users[h]||h;
-    if(f&&nick.indexOf(f)===-1)continue;
-    shown++;var role=roleOf(h);
-    var badge=role==="super"?'<span class="badge b-super">방장</span>':role==="admin"?'<span class="badge b-admin">관리자</span>':'';
-    html+='<div class="uitem"><div class="uname">'+esc(nick)+badge+'</div><div class="roles">'+
-      '<button class="'+(role==="super"?"on super":"")+'" onclick="setRole(\''+h+'\',\'super\')">방장</button>'+
-      '<button class="'+(role==="admin"?"on":"")+'" onclick="setRole(\''+h+'\',\'admin\')">관리자</button>'+
-      '<button class="'+(role==="user"?"on":"")+'" onclick="setRole(\''+h+'\',\'user\')">일반</button>'+
-      '</div></div>';
+  var groups=usersInScope(roster,sel),html="",shown=0,gi,i,h,hs,rows;
+  for(gi=0;gi<groups.length;gi++){
+    hs=sortedHashes(groups[gi]); rows="";
+    for(i=0;i<hs.length;i++){
+      h=hs[i];var nick=roster.users[h]||h;
+      if(f&&nick.indexOf(f)===-1)continue;
+      shown++;var role=roleOf(h);
+      var badge=role==="super"?'<span class="badge b-super">방장</span>':role==="admin"?'<span class="badge b-admin">관리자</span>':'';
+      rows+='<div class="uitem"><div class="uname">'+esc(nick)+badge+'</div><div class="roles">'+
+        '<button class="'+(role==="super"?"on super":"")+'" onclick="setRole(\''+h+'\',\'super\')">방장</button>'+
+        '<button class="'+(role==="admin"?"on":"")+'" onclick="setRole(\''+h+'\',\'admin\')">관리자</button>'+
+        '<button class="'+(role==="user"?"on":"")+'" onclick="setRole(\''+h+'\',\'user\')">일반</button>'+
+        '</div></div>';
+    }
+    if(rows)html+=grpHead(groups[gi])+rows;
   }
-  if(!shown)html='<div class="muted">'+(Object.keys(roster.users).length?"검색 결과 없음":"유저 목록이 비어있습니다. 봇이 켜져 roster를 올렸는지 확인하세요.")+'</div>';
-  box.innerHTML=html;
+  box.innerHTML=shown?html:emptyMsg();
 }
 
 // ---- 차단 탭 ----
@@ -313,105 +459,229 @@ function toggleBan(hash,on){ if(on)arrAdd(state.banned,hash); else arrDel(state.
 function renderBan(){
   var box=$("banList"); if(!box)return;
   var f=($("banFilter")&&$("banFilter").value||"").trim();
-  var hashes=[],h; for(h in roster.users)if(roster.users.hasOwnProperty(h))hashes.push(h);
-  hashes.sort(function(a,b){return (roster.users[a]||"").localeCompare(roster.users[b]||"");});
-  var html="",shown=0;
-  for(var i=0;i<hashes.length;i++){
-    h=hashes[i];var nick=roster.users[h]||h;
-    if(f&&nick.indexOf(f)===-1)continue;
-    shown++;var on=arrHas(state.banned,h);
-    html+='<div class="uitem"><div class="uname">'+esc(nick)+(on?'<span class="badge b-ban">차단됨</span>':'')+'</div>'+
-      '<input type="checkbox" '+(on?"checked":"")+' onchange="toggleBan(\''+h+'\',this.checked)"></div>';
+  var groups=usersInScope(roster,sel),html="",shown=0,gi,i,h,hs,rows;
+  for(gi=0;gi<groups.length;gi++){
+    hs=sortedHashes(groups[gi]); rows="";
+    for(i=0;i<hs.length;i++){
+      h=hs[i];var nick=roster.users[h]||h;
+      if(f&&nick.indexOf(f)===-1)continue;
+      shown++;var on=arrHas(state.banned,h);
+      rows+='<div class="uitem"><div class="uname">'+esc(nick)+(on?'<span class="badge b-ban">차단됨</span>':'')+'</div>'+
+        '<input type="checkbox" '+(on?"checked":"")+' onchange="toggleBan(\''+h+'\',this.checked)"></div>';
+    }
+    if(rows)html+=grpHead(groups[gi])+rows;
   }
-  if(!shown)html='<div class="muted">'+(Object.keys(roster.users).length?"검색 결과 없음":"유저 목록이 비어있습니다.")+'</div>';
-  box.innerHTML=html;
+  box.innerHTML=shown?html:emptyMsg();
 }
 function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
 function jsq(s){return String(s).replace(/\\/g,"\\\\").replace(/'/g,"\\'");}
 
 // ---- 관리 탭 (포인트/경험치 지급, 월간 초기화) ----
 function fillGiveUsers(){
-  var sel=$("giveUser"); if(!sel)return;
-  var hashes=[],h; for(h in roster.users)if(roster.users.hasOwnProperty(h))hashes.push(h);
-  hashes.sort(function(a,b){return (roster.users[a]||"").localeCompare(roster.users[b]||"");});
-  var html=""; for(var i=0;i<hashes.length;i++)html+='<option value="'+hashes[i]+'">'+esc(roster.users[hashes[i]]||hashes[i])+'</option>';
-  sel.innerHTML=html||'<option value="">(유저 없음 — 봇 실행 확인)</option>';
+  var box=$("giveUser"); if(!box)return;   // 옛 코드가 지역변수를 sel 로 써서 전역 방 범위를 가렸다
+  var groups=usersInScope(roster,sel),html="",gi,i,hs,body;
+  for(gi=0;gi<groups.length;gi++){
+    hs=sortedHashes(groups[gi]); body="";
+    for(i=0;i<hs.length;i++)body+='<option value="'+hs[i]+'">'+esc(roster.users[hs[i]]||hs[i])+'</option>';
+    html+=(sel===GLOBAL_SEL)?('<optgroup label="'+esc(groups[gi].name)+'">'+body+'</optgroup>'):body;
+  }
+  box.innerHTML=html||'<option value="">(유저 없음 — 봇 실행 확인)</option>';
 }
 function pushCmd(cmd,okMsg){
-  var u=ep("/commands"); if(!u)return; saveConn(); setStatus("전송 중...",false);
-  fetch(u,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(cmd)})
-    .then(function(r){if(!r.ok)throw new Error("HTTP "+r.status);return r.json();})
+  if(!ep("/commands"))return; saveConn(); setStatus("전송 중...",false);
+  ensureToken().then(function(){
+    return fetch(ep("/commands"),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(cmd)});
+  }).then(function(r){if(!r.ok)throw new Error("HTTP "+r.status);return r.json();})
     .then(function(){setStatus(okMsg+" — 봇이 곧 처리해요.",false);})
-    .catch(function(e){setStatus("실패: "+e,true);});
+    .catch(function(e){netFail(e,"실패: ");});
 }
 function giveCmd(type){
-  var sel=$("giveUser"); if(!sel||!sel.value){setStatus("대상 유저를 선택하세요.",true);return;}
+  var box=$("giveUser"); if(!box||!box.value){setStatus("대상 유저를 선택하세요.",true);return;}
   var amt=parseInt($("giveAmount").value,10); if(isNaN(amt)||amt===0){setStatus("금액(0 아님)을 입력하세요.",true);return;}
-  var nick=roster.users[sel.value]||sel.value;
-  pushCmd({type:type,hash:sel.value,amount:amt}, "✓ "+nick+"님 "+(type==="addPoints"?"포인트":"경험치")+" "+amt+" 지급 요청");
+  var nick=roster.users[box.value]||box.value;   // hash 직접 지정이라 방 구분이 이미 정확하다
+  pushCmd({type:type,hash:box.value,amount:amt}, "✓ "+nick+"님 "+(type==="addPoints"?"포인트":"경험치")+" "+amt+" 지급 요청");
 }
 function seasonResetCmd(){
-  if(!confirm("정말 월간 초기화할까요?\n모든 유저의 포인트·레벨·칭호·전적·출석·채팅이 초기화됩니다."))return;
-  pushCmd({type:"seasonReset"}, "✓ 월간 초기화 요청");
+  var target=(sel===GLOBAL_SEL)?null:sel;
+  if(!target&&(roster.registered||[]).length>1){setStatus("방이 여러 개입니다. 위에서 방을 선택하세요.",true);return;}
+  var who=target?roomLabel(roster,target):"전체";
+  if(!confirm("정말 "+who+" 월간 초기화할까요?\n포인트·레벨·칭호·전적·출석·채팅이 초기화됩니다."))return;
+  var cmd={type:"seasonReset"}; if(target)cmd.roomKey=target;
+  pushCmd(cmd, "✓ "+who+" 월간 초기화 요청");
+}
+
+// ===== 인증 (Firebase Auth 이메일/비번 → 1시간짜리 idToken) =====
+// 웹 API 키는 비밀이 아니다 — 프로젝트 식별자일 뿐이다. 실제 방어는 RTDB 규칙의 auth.uid 검사이고,
+// 콘솔에서 가입(sign-up)을 꺼두지 않으면 누구나 계정을 만들어 auth != null 을 통과한다
+var FB_API_KEY="AIzaSyDPLsBadmYrsYH7UtxnZQRQRgJixDwzhOM";
+var IDT_URL="https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=";
+var TOK_URL="https://securetoken.googleapis.com/v1/token?key=";
+var RT_KEY="fbRefresh";   // sessionStorage — 탭을 닫으면 사라진다. localStorage 는 쓰지 않는다
+
+var idToken="",refreshTok="",tokenExp=0;
+
+// 만료 60초 전부터 갱신한다. exp=0 은 미로그인
+function tokenFresh(exp,now){ return exp>0 && now < exp-60000; }
+
+function authFail(r){ return r.json().catch(function(){return{};}).then(function(j){ throw new Error((j.error&&j.error.message)||("HTTP "+r.status)); }); }
+function takeToken(j){
+  idToken=j.idToken||j.id_token||"";
+  refreshTok=j.refreshToken||j.refresh_token||"";
+  tokenExp=Date.now()+(parseInt(j.expiresIn||j.expires_in,10)||3600)*1000;
+  try{sessionStorage.setItem(RT_KEY,refreshTok);}catch(e){}
+}
+function signIn(email,pw){
+  return fetch(IDT_URL+FB_API_KEY,{method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({email:email,password:pw,returnSecureToken:true})})
+    .then(function(r){return r.ok?r.json():authFail(r);}).then(takeToken);
+}
+function refreshAuth(){
+  if(!refreshTok)return Promise.reject(new Error("NO_REFRESH_TOKEN"));
+  return fetch(TOK_URL+FB_API_KEY,{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},
+    body:"grant_type=refresh_token&refresh_token="+encodeURIComponent(refreshTok)})
+    .then(function(r){return r.ok?r.json():authFail(r);}).then(takeToken);
+}
+// 네트워크 동작 직전에만 확인한다. 노트북이 잠들어 setInterval 이 멎어도 안전하다
+function ensureToken(){ return tokenFresh(tokenExp,Date.now())?Promise.resolve():refreshAuth(); }
+function signOut(){
+  idToken="";refreshTok="";tokenExp=0;
+  try{sessionStorage.removeItem(RT_KEY);}catch(e){}
+  $("gate").className="gate"; $("pw").value=""; $("pwErr").textContent="";
+  setTimeout(function(){$("pw").focus();},100);
+}
+// 세션이 끊긴 채로 화면에 남아 있지 않게, 실패하면 곧장 로그인으로 돌린다
+function onAuthLost(){ signOut(); $("pwErr").textContent="세션이 만료됐습니다. 다시 로그인하세요."; }
+// 401 = 토큰이 죽었거나 규칙이 이 uid 를 거부. 어느 쪽이든 화면에 남겨둘 이유가 없다
+function netFail(e,prefix){
+  var m=String(e);
+  if(m.indexOf("401")!==-1||m.indexOf("NO_REFRESH_TOKEN")!==-1||m.indexOf("TOKEN_EXPIRED")!==-1){onAuthLost();return;}
+  setStatus(prefix+m,true);
 }
 
 // ---- Firebase ----
 function ep(sub){
-  var url=$("fbUrl").value.trim().replace(/\/+$/,""),auth=$("fbAuth").value.trim();
+  var url=$("fbUrl").value.trim().replace(/\/+$/,"");
   if(!url){setStatus("RTDB URL을 입력하세요.",true);return null;}
-  return url+sub+".json"+(auth?("?auth="+encodeURIComponent(auth)):"");
+  return url+sub+".json?auth="+encodeURIComponent(idToken);
 }
 function setStatus(m,e){var s=$("status");s.textContent=m;s.style.color=e?"var(--err)":"var(--ok)";}
-function saveConn(){try{localStorage.setItem("fbConn",JSON.stringify({url:$("fbUrl").value,auth:$("fbAuth").value}));}catch(e){}}
-function loadConn(){try{var c=JSON.parse(localStorage.getItem("fbConn")||"{}");if(c.url)$("fbUrl").value=c.url;if(c.auth)$("fbAuth").value=c.auth;}catch(e){}}
+function saveConn(){try{localStorage.setItem("fbConn",JSON.stringify({url:$("fbUrl").value}));}catch(e){}}
+function loadConn(){try{var c=JSON.parse(localStorage.getItem("fbConn")||"{}");if(c.url)$("fbUrl").value=c.url;}catch(e){}}
+// RTDB 는 권한 거부에 401 + {"error":"Permission denied"} 본문을 준다.
+// r.ok 를 안 보면 그 에러 객체가 설정으로 둔갑해 폼에 채워진다
+function jsonOk(r){ if(!r.ok)throw new Error("HTTP "+r.status); return r.json(); }
+
+// 🚨 /rooms/{key} 나 /rooms 를 통째로 쓰지 말 것. name 은 봇이 발행하는 sentinel 이고,
+//    그게 사라지면 봇이 "웹이 지웠다" 와 "DB가 비었다" 를 구분 못 한다 (Phase 6.2)
+function roomCfgPath(key){ return "/rooms/"+encodeURIComponent(key)+"/botConfig"; }
 
 function loadAll(){
-  if(!ep("/botConfig"))return; saveConn(); setStatus("불러오는 중...",false);
-  Promise.all([
-    fetch(ep("/botConfig")).then(function(r){return r.json();}).catch(function(){return null;}),
-    fetch(ep("/roster")).then(function(r){return r.json();}).catch(function(){return null;})
-  ]).then(function(res){
-    fillForm(res[0]||{});
-    var ro=res[1]||{};
-    rosterLoaded=!!res[1];
+  if(!ep("/global/botConfig"))return; saveConn(); setStatus("불러오는 중...",false);
+  ensureToken().then(function(){
+    return Promise.all([
+      fetch(ep("/global/botConfig")).then(jsonOk),
+      fetch(ep("/rooms")).then(jsonOk),
+      // roster 만 관대하게 — 없으면 rosterLoaded=false 가드가 /adminState 덮어쓰기를 막는다
+      fetch(ep("/roster")).then(jsonOk).catch(function(){return null;})
+    ]);
+  }).then(function(res){
+    globalCfg=res[0]||{};
+    roomCfgs={}; var nodes=res[1]||{},k;
+    for(k in nodes)if(nodes.hasOwnProperty(k)&&nodes[k]&&typeof nodes[k]==="object")roomCfgs[k]=nodes[k].botConfig||null;
+    var ro=res[2]||{};
+    rosterLoaded=!!res[2];
     roster.users=ro.users||{}; roster.rooms=ro.rooms||{};
+    roster.userRooms=ro.userRooms||{}; roster.registered=ro.registered||[];
     state.superAdmins=(ro.superAdmins||[]).slice();
     state.admins=(ro.admins||[]).slice();
     state.blockedRooms=(ro.blockedRooms||[]).slice();
     state.banned=(ro.banned||[]).slice();
-    renderSuper(); renderBlock(); renderBan(); fillGiveUsers();
-    setStatus("✓ 불러왔습니다."+(res[1]?"":" (roster 없음 — 봇 실행 확인)"),false);
-  }).catch(function(e){setStatus("불러오기 실패: "+e,true);});
+    buildRoomBar(); onRoomChange(); renderBlock();   // onRoomChange 가 폼·유저목록을 다시 그린다
+    setStatus("✓ 불러왔습니다."+(res[2]?"":" (roster 없음 — 봇 실행 확인)"),false);
+  }).catch(function(e){netFail(e,"불러오기 실패: ");});
 }
 function saveAll(){
-  if(!ep("/botConfig"))return; saveConn(); setStatus("저장 중...",false);
-  var puts=[ fetch(ep("/botConfig"),{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(collectForm())}) ];
+  if(!ep("/global/botConfig"))return; saveConn(); setStatus("저장 중...",false);
+  ensureToken().then(doSave).catch(function(e){netFail(e,"저장 실패: ");});
+}
+function doSave(){
+  var form=collectForm(),puts=[],msg,ov;
+  if(sel===GLOBAL_SEL){
+    globalCfg=form;
+    puts.push(fetch(ep("/global/botConfig"),{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(form)}));
+    msg="✓ 전역 저장 완료!";
+  }else{
+    ov=diffPin(globalCfg,form); roomCfgs[sel]=ov;
+    if(ov)puts.push(fetch(ep(roomCfgPath(sel)),{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(ov)}));
+    else   puts.push(fetch(ep(roomCfgPath(sel)),{method:"DELETE"}));   // 전역과 전부 같으면 오버라이드를 남기지 않는다
+    msg=ov?("✓ "+roomLabel(roster,sel)+" 저장 완료! (고정 "+pinCount(ov)+"개)"):("✓ "+roomLabel(roster,sel)+" — 전역을 따릅니다.");
+  }
   if(rosterLoaded){   // roster 못 불러왔으면 권한/차단을 덮어쓰지 않음(방장 잠금 방지)
+    // state 배열은 렌더만 필터링될 뿐 항상 전 방을 담고 있다 — 방 탭에서 저장해도 다른 방 방장이 안 지워진다
     var adm=JSON.stringify({superAdmins:state.superAdmins,admins:state.admins,blockedRooms:state.blockedRooms,banned:state.banned});
     puts.push(fetch(ep("/adminState"),{method:"PUT",headers:{"Content-Type":"application/json"},body:adm}));
   }
-  Promise.all(puts).then(function(rs){
+  return Promise.all(puts).then(function(rs){
     for(var i=0;i<rs.length;i++)if(!rs[i].ok)throw new Error("HTTP "+rs[i].status);
-    setStatus("✓ 저장 완료!"+(rosterLoaded?"":" (권한/차단은 roster 미로딩이라 건너뜀)")+" 봇이 곧 반영합니다.",false);
-  }).catch(function(e){setStatus("저장 실패: "+e,true);});
+    applyScopeUI();
+    setStatus(msg+(rosterLoaded?"":" (권한/차단은 roster 미로딩이라 건너뜀)")+" 봇이 곧 반영합니다.",false);
+  });
+}
+function followGlobal(){
+  if(sel===GLOBAL_SEL)return;
+  var name=roomLabel(roster,sel);
+  if(!confirm(name+" 의 방별 설정을 전부 지우고 전역을 따르게 할까요?"))return;
+  if(!ep(roomCfgPath(sel)))return; saveConn(); setStatus("전역 따르기 적용 중...",false);
+  ensureToken().then(function(){
+    return fetch(ep(roomCfgPath(sel)),{method:"DELETE"});   // 토큰이 갱신됐을 수 있어 URL 을 다시 만든다
+  }).then(function(r){
+    if(!r.ok)throw new Error("HTTP "+r.status);
+    roomCfgs[sel]=null;
+    fillForm(globalCfg); applyScopeUI();
+    setStatus("✓ "+name+" 이(가) 전역을 따릅니다. 봇이 곧 반영합니다.",false);
+  }).catch(function(e){netFail(e,"실패: ");});
 }
 
-// ---- 비밀번호 잠금 ----
-var PASSWORD="admin123";
+// ---- 로그인 ----
 function init(){
   buildTabs();
+  buildRoomBar();
   fillForm({});
-  renderSuper(); renderBlock(); renderBan(); fillGiveUsers();
+  applyScopeUI(); renderBlock();
   loadConn();
   if($("fbUrl").value) loadAll();
 }
-function unlock(){
-  if($("pw").value===PASSWORD){ try{sessionStorage.setItem("ok","1");}catch(e){} $("gate").className="gate hidden"; init(); }
-  else { $("pwErr").textContent="비밀번호가 틀렸습니다."; $("pw").value=""; }
+function enter(email){
+  $("gate").className="gate hidden";
+  $("whoami").textContent=email||"";
+  $("pw").value="";
+  init();
 }
-var _ok=false; try{_ok=sessionStorage.getItem("ok")==="1";}catch(e){}
-if(_ok){ $("gate").className="gate hidden"; init(); }
-else { setTimeout(function(){ var p=$("pw"); if(p)p.focus(); },100); }
+function unlock(){
+  var email=$("email").value.trim(),pw=$("pw").value,btn=$("loginBtn");
+  if(!email||!pw){ $("pwErr").textContent="이메일과 비밀번호를 입력하세요."; return; }
+  btn.disabled=true; $("pwErr").textContent="확인 중...";
+  signIn(email,pw).then(function(){
+    btn.disabled=false;
+    try{localStorage.setItem("fbEmail",email);}catch(e){}   // 비번은 저장하지 않는다
+    enter(email);
+  }).catch(function(e){
+    btn.disabled=false;
+    $("pwErr").textContent="로그인 실패: "+String(e).replace("Error: ","");
+    $("pw").value="";
+  });
+}
+// 새로고침 복구 — refresh 토큰은 sessionStorage 라 탭을 닫으면 사라진다
+(function boot(){
+  try{ refreshTok=sessionStorage.getItem(RT_KEY)||""; }catch(e){}
+  try{ $("email").value=localStorage.getItem("fbEmail")||""; }catch(e){}
+  if(refreshTok){
+    refreshAuth().then(function(){ enter($("email").value); })
+                 .catch(function(){ signOut(); });
+    return;
+  }
+  setTimeout(function(){ $("email").focus(); },100);
+})();
 </script>
 </body>
 </html>
